@@ -117,7 +117,7 @@ export default function NavbarDummy({
         </div>
 
         {/* Right links (desktop) */}
-        <ul className="hidden items-center gap-1 sm:flex">
+        <ul className="hidden items-center gap-1 xl:flex">
           {rightLinks.map((l) => (
             <li key={l.href}>
               <NavLink
@@ -134,7 +134,7 @@ export default function NavbarDummy({
         {/* Mobile toggles */}
         <button
           onClick={() => setOpen((v) => !v)}
-          className="ml-auto inline-flex items-center rounded-xl px-3 py-2 text-sm font-medium ring-1 ring-black/10 ring-inset hover:bg-black/5 sm:hidden dark:ring-white/10 dark:hover:bg-white/10"
+          className="ml-auto inline-flex items-center rounded-xl px-3 py-2 text-sm font-medium ring-1 ring-black/10 ring-inset hover:bg-black/5 xl:hidden dark:ring-white/10 dark:hover:bg-white/10"
           aria-expanded={open}
           aria-label="Toggle menu"
         >
@@ -147,9 +147,9 @@ export default function NavbarDummy({
       </nav>
 
       {/* Mobile panel */}
-      <div className={`sm:hidden ${open ? "block" : "hidden"}`}>
+      <div className={`xl:hidden ${open ? "block" : "hidden"}`}>
         <div className="border-t border-black/5 px-3 py-2 dark:border-white/10">
-          <div className="relative">
+          <div className="relative sm:hidden">
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}

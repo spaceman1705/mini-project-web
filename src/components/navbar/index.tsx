@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useMemo, useState } from "react";
 import { FaMagnifyingGlass } from "react-icons/fa6";
+import { IoClose, IoMenu } from "react-icons/io5";
 
 export type Role = "admin" | "organizer" | "customer" | "guest";
 
@@ -13,7 +14,7 @@ type NavbarProps = {
 };
 
 export default function Navbar({
-  role = "guest",
+  role = "admin",
   brand = "evora",
 }: NavbarProps) {
   const pathname = usePathname();
@@ -49,7 +50,7 @@ export default function Navbar({
   const organizerRight = useMemo(
     () => [
       { label: "Dashboard", href: "/org/dashboard" },
-      { label: "Events", href: "/org/events" },
+      { label: "My Events", href: "/org/events" },
       { label: "Transactions", href: "/org/transactions" },
       { label: "Profile", href: "/org/profile" },
     ],
@@ -59,7 +60,7 @@ export default function Navbar({
   const adminRight = useMemo(
     () => [
       { label: "Dashboard", href: "/adm/dashboard" },
-      { label: "Events", href: "/adm/events" },
+      { label: "Manage Events", href: "/adm/events" },
       { label: "Users", href: "/adm/users" },
       { label: "Reports", href: "/adm/reports" },
       { label: "Settings", href: "/adm/settings" },
@@ -82,53 +83,113 @@ export default function Navbar({
   };
 
   return (
-    <header className="sticky top-0 w-full bg-gray-100 shadow-sm shadow-black/15 dark:bg-gray-900">
+    <header className="bg-secondary sticky top-0 w-full">
       {/* Brand */}
-      <nav className="mx-auto flex h-14 items-center gap-4 px-3 md:h-16 md:px-4">
-        <Link
-          href="/"
-          className="text-4xl font-semibold tracking-tight text-gray-900 dark:text-gray-100"
-        >
-          {brand}
-        </Link>
+      <nav className="mx-auto flex h-14 items-center justify-between gap-4 px-3 md:h-16 md:px-4">
+        {/* Left */}
+        <div className="flex gap-4">
+          <Link
+            href="/"
+            className="from-accent1-primary to-accent2-primary bg-linear-to-r/oklch bg-clip-text text-4xl font-semibold tracking-tight text-transparent"
+          >
+            {brand}
+          </Link>
 
-        {/* Left links (desktop) */}
-        <ul className="ml-2 hidden items-center gap-2 sm:flex">
-          {commonLeft.map((l, i) => (
-            <li key={i}>
-              <NavLink href={l.href} active={isActive(l.href)}>
-                {l.label}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
+          {/* Left links (desktop) */}
+          <ul className="ml-2 hidden items-center gap-2 sm:flex">
+            {commonLeft.map((l, i) => (
+              <li key={i}>
+                <NavLink href={l.href} active={isActive(l.href)}>
+                  {l.label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-        {/* Search */}
-        <div className="ml-auto hidden max-w-sm min-w-sm flex-1 items-center sm:flex">
-          <div className="relative w-full">
+        {/* Right */}
+        <div className="flex gap-4">
+          {/* Search */}
+          <div className="hidden min-w-md flex-1 items-center xl:flex">
+            <div className="relative w-full">
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search events..."
+                className="bg-tertiary w-full rounded-lg px-3 py-2 outline-none"
+              />
+              <div className="text-md bg-secondary text-muted pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 rounded-md px-2 py-2">
+                <FaMagnifyingGlass />
+              </div>
+            </div>
+          </div>
+
+          {/* Right links (desktop) */}
+          <ul className="ml-2 hidden items-center gap-2 xl:flex">
+            {rightLinks.map((l, i) => (
+              <li key={i}>
+                <NavLink href={l.href} active={isActive(l.href)}>
+                  {l.label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+
+          {/* Toggle menu */}
+          <button
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            aria-label="Toggle menu"
+            className="bg-tertiary text-muted rounded-lg p-2 text-2xl xl:hidden"
+          >
+            {open ? <IoClose /> : <IoMenu />}
+          </button>
+        </div>
+      </nav>
+
+      {/* Panel */}
+      <div className={`xl:hidden ${open ? "block" : "hidden"}`}>
+        <div className="px-3 py-2 md:px-4">
+          {/* Search */}
+          <div className="relative xl:hidden">
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search events..."
-              className="w-full rounded-lg bg-white px-3 py-2 inset-shadow-sm inset-shadow-black/15 outline-none dark:bg-gray-800"
+              className="bg-tertiary w-full rounded-lg px-3 py-2 text-lg outline-none"
             />
-            <div className="text-md pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 rounded-md bg-gray-100 px-2 py-1 text-gray-700 shadow-sm shadow-black/15 dark:bg-gray-900 dark:text-gray-300">
+            <div className="bg-secondary text-muted pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 rounded-md px-2 py-2 text-lg">
               <FaMagnifyingGlass />
             </div>
           </div>
-        </div>
 
-        {/* Right links (desktop) */}
-        <ul className="ml-2 hidden items-center gap-2 sm:flex">
-          {rightLinks.map((l, i) => (
-            <li key={i}>
-              <NavLink href={l.href} active={isActive(l.href)}>
+          {/* Links */}
+          <div className="grid gap-2 sm:hidden">
+            {commonLeft.map((l, i) => (
+              <Link
+                key={i}
+                href={l.href}
+                className={menuItem(isActive(l.href))}
+                onClick={() => setOpen(false)}
+              >
                 {l.label}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-      </nav>
+              </Link>
+            ))}
+          </div>
+          <div className="border-muted mt-2 grid gap-2 border-t">
+            {rightLinks.map((l, i) => (
+              <Link
+                key={i}
+                href={l.href}
+                className={menuItem(isActive(l.href))}
+                onClick={() => setOpen(false)}
+              >
+                {l.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
     </header>
   );
 }
@@ -146,13 +207,20 @@ function NavLink({
     <Link
       href={href}
       className={[
-        "rounded-lg px-3 py-2 text-sm font-medium text-gray-900 transition dark:text-gray-100",
+        "text-muted rounded-lg px-3 py-2 text-sm font-semibold transition duration-300",
         active
-          ? "bg-white shadow-sm shadow-black/15 dark:bg-gray-800 dark:shadow-white/10"
-          : "hover:bg-white hover:shadow-sm hover:shadow-black/15 dark:hover:bg-gray-800 hover:dark:shadow-white/10",
+          ? "from-accent1-hover to-accent2-hover bg-linear-to-r/oklch"
+          : "hover:from-accent1-hover hover:to-accent2-hover hover:bg-linear-to-r/oklch",
       ].join(" ")}
     >
       {children}
     </Link>
   );
+}
+
+function menuItem(active?: boolean) {
+  return [
+    "w-full rounded-lg px-3 py-2 text-xl mt-2",
+    active ? "bg-primary text-clear" : "text-muted",
+  ].join(" ");
 }
