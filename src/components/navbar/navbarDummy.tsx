@@ -3,16 +3,6 @@ import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-/**
- * UI-ONLY NAVBAR (Appearance First)
- * ------------------------------------------------------------------
- * Focus: tampilan/appearance saja, tanpa auth, tanpa Zustand, tanpa Next-Auth.
- * Cara pakai: <Navbar role="guest" /> | "customer" | "organizer" | "admin"
- *
- * Catatan: Semua interaksi (search, login/logout) hanya UI mock.
- * Nanti kita sambungkan ke logic after-the-fact.
- */
-
 export type Role = "guest" | "customer" | "organizer" | "admin";
 
 type NavbarProps = {
@@ -240,35 +230,3 @@ function LogoMark() {
     </div>
   );
 }
-
-/**
- * -------------------------------------------------
- * TESTS (UI only) — __tests__/Navbar.ui.test.tsx
- * -------------------------------------------------
- * Tujuan: verifikasi link tampil sesuai role, tanpa auth logic.
- *
- * import { render, screen } from "@testing-library/react";
- * import Navbar from "../src/components/Navbar";
- *
- * it("guest sees Log in & Sign up", () => {
- *   render(<Navbar role="guest" />);
- *   expect(screen.getByText(/log in/i)).toBeInTheDocument();
- *   expect(screen.getByText(/sign up/i)).toBeInTheDocument();
- * });
- *
- * it("customer sees My Tickets", () => {
- *   render(<Navbar role="customer" />);
- *   expect(screen.getByText(/my tickets/i)).toBeInTheDocument();
- * });
- *
- * it("organizer sees Dashboard", () => {
- *   render(<Navbar role="organizer" />);
- *   expect(screen.getByText(/dashboard/i)).toBeInTheDocument();
- * });
- *
- * it("admin sees Admin Dashboard & Users", () => {
- *   render(<Navbar role="admin" />);
- *   expect(screen.getByText(/admin dashboard/i)).toBeInTheDocument();
- *   expect(screen.getByText(/users/i)).toBeInTheDocument();
- * });
- */
