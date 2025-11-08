@@ -33,7 +33,7 @@ export default function Navbar({
   const guestRight = useMemo(
     () => [
       { label: "Login", href: "/login" },
-      { label: "Register", href: "/register" },
+      { label: "Register", href: "/auth/register" },
     ],
     [],
   );
