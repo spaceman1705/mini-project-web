@@ -14,7 +14,7 @@ type NavbarProps = {
 };
 
 export default function Navbar({
-  role = "admin",
+  role = "guest",
   brand = "evora",
 }: NavbarProps) {
   const pathname = usePathname();
