@@ -22,7 +22,7 @@ export default function Navbar({
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
 
-  const commonLeft = useMemo(
+  const common = useMemo(
     () => [
       { label: "Explore", href: "/" },
       { label: "Events", href: "/events" },
@@ -30,15 +30,15 @@ export default function Navbar({
     [],
   );
 
-  const guestRight = useMemo(
+  const guest = useMemo(
     () => [
       { label: "Login", href: "/login" },
-      { label: "Register", href: "/register" },
+      { label: "Register", href: "/auth/register" },
     ],
     [],
   );
 
-  const customerRight = useMemo(
+  const customer = useMemo(
     () => [
       { label: "Tickets", href: "/me/tickets" },
       { label: "Transactions", href: "/me/transactions" },
@@ -47,7 +47,7 @@ export default function Navbar({
     [],
   );
 
-  const organizerRight = useMemo(
+  const organizer = useMemo(
     () => [
       { label: "Dashboard", href: "/org/dashboard" },
       { label: "My Events", href: "/org/events" },
@@ -57,7 +57,7 @@ export default function Navbar({
     [],
   );
 
-  const adminRight = useMemo(
+  const admin = useMemo(
     () => [
       { label: "Dashboard", href: "/adm/dashboard" },
       { label: "Manage Events", href: "/adm/events" },
@@ -70,12 +70,12 @@ export default function Navbar({
 
   const rightLinks =
     role === "admin"
-      ? adminRight
+      ? admin
       : role === "organizer"
-        ? organizerRight
+        ? organizer
         : role === "customer"
-          ? customerRight
-          : guestRight;
+          ? customer
+          : guest;
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -97,11 +97,19 @@ export default function Navbar({
 
           {/* Left links (desktop) */}
           <ul className="ml-2 hidden items-center gap-2 sm:flex">
-            {commonLeft.map((l, i) => (
+            {common.map((l, i) => (
               <li key={i}>
-                <NavLink href={l.href} active={isActive(l.href)}>
+                <Link
+                  href={l.href}
+                  className={[
+                    "text-muted rounded-lg px-3 py-2 text-sm font-semibold transition duration-300",
+                    isActive(l.href)
+                      ? "from-accent1-hover to-accent2-hover bg-linear-to-r/oklch"
+                      : "hover:from-accent1-hover hover:to-accent2-hover hover:bg-linear-to-r/oklch",
+                  ].join(" ")}
+                >
                   {l.label}
-                </NavLink>
+                </Link>
               </li>
             ))}
           </ul>
@@ -126,11 +134,19 @@ export default function Navbar({
 
           {/* Right links (desktop) */}
           <ul className="ml-2 hidden items-center gap-2 xl:flex">
-            {rightLinks.map((l, i) => (
-              <li key={i}>
-                <NavLink href={l.href} active={isActive(l.href)}>
+            {rightLinks.map((l) => (
+              <li key={l.href}>
+                <Link
+                  href={l.href}
+                  className={[
+                    "text-muted rounded-lg px-3 py-2 text-sm font-semibold transition duration-300",
+                    isActive(l.href)
+                      ? "from-accent1-hover to-accent2-hover bg-linear-to-r/oklch"
+                      : "hover:from-accent1-hover hover:to-accent2-hover hover:bg-linear-to-r/oklch",
+                  ].join(" ")}
+                >
                   {l.label}
-                </NavLink>
+                </Link>
               </li>
             ))}
           </ul>
@@ -165,11 +181,14 @@ export default function Navbar({
 
           {/* Links */}
           <div className="grid gap-2 sm:hidden">
-            {commonLeft.map((l, i) => (
+            {common.map((l) => (
               <Link
-                key={i}
+                key={l.href}
                 href={l.href}
-                className={menuItem(isActive(l.href))}
+                className={[
+                  "mt-2 w-full rounded-lg px-3 py-2 text-xl",
+                  isActive(l.href) ? "bg-primary text-clear" : "text-muted",
+                ].join(" ")}
                 onClick={() => setOpen(false)}
               >
                 {l.label}
@@ -181,7 +200,10 @@ export default function Navbar({
               <Link
                 key={i}
                 href={l.href}
-                className={menuItem(isActive(l.href))}
+                className={[
+                  "mt-2 w-full rounded-lg px-3 py-2 text-xl",
+                  isActive(l.href) ? "bg-primary text-clear" : "text-muted",
+                ].join(" ")}
                 onClick={() => setOpen(false)}
               >
                 {l.label}
@@ -192,35 +214,4 @@ export default function Navbar({
       </div>
     </header>
   );
-}
-
-function NavLink({
-  href,
-  active,
-  children,
-}: {
-  href: string;
-  active?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      className={[
-        "text-muted rounded-lg px-3 py-2 text-sm font-semibold transition duration-300",
-        active
-          ? "from-accent1-hover to-accent2-hover bg-linear-to-r/oklch"
-          : "hover:from-accent1-hover hover:to-accent2-hover hover:bg-linear-to-r/oklch",
-      ].join(" ")}
-    >
-      {children}
-    </Link>
-  );
-}
-
-function menuItem(active?: boolean) {
-  return [
-    "w-full rounded-lg px-3 py-2 text-xl mt-2",
-    active ? "bg-primary text-clear" : "text-muted",
-  ].join(" ");
 }
