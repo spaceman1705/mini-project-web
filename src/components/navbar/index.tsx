@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useMemo, useState } from "react";
-import { FaMagnifyingGlass } from "react-icons/fa6";
-import { IoClose, IoMenu } from "react-icons/io5";
+import { useMemo, useState } from "react";
+import { IoClose, IoMenu, IoSearch } from "react-icons/io5";
 
 export type Role = "admin" | "organizer" | "customer" | "guest";
 
@@ -83,7 +82,7 @@ export default function Navbar({
   };
 
   return (
-    <header className="bg-secondary sticky top-0 w-full">
+    <header className="bg-secondary sticky top-0 z-50 w-full">
       {/* Brand */}
       <nav className="mx-auto flex h-14 items-center justify-between gap-4 px-3 md:h-16 md:px-4">
         {/* Left */}
@@ -97,8 +96,8 @@ export default function Navbar({
 
           {/* Left links (desktop) */}
           <ul className="ml-2 hidden items-center gap-2 sm:flex">
-            {common.map((l, i) => (
-              <li key={i}>
+            {common.map((l) => (
+              <li key={l.href}>
                 <Link
                   href={l.href}
                   className={[
@@ -124,10 +123,10 @@ export default function Navbar({
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search events..."
-                className="bg-tertiary w-full rounded-lg px-3 py-2 outline-none"
+                className="bg-tertiary w-full rounded-full py-2 pr-12 pl-4 outline-none"
               />
-              <div className="text-md bg-secondary text-muted pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 rounded-md px-2 py-2">
-                <FaMagnifyingGlass />
+              <div className="text-md bg-secondary text-muted pointer-events-none absolute top-1/2 right-1 -translate-y-1/2 rounded-full p-2">
+                <IoSearch className="h-5 w-5" />
               </div>
             </div>
           </div>
@@ -156,26 +155,30 @@ export default function Navbar({
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
             aria-label="Toggle menu"
-            className="bg-tertiary text-muted rounded-lg p-2 text-2xl xl:hidden"
+            className="bg-tertiary text-muted rounded-lg p-2 xl:hidden"
           >
-            {open ? <IoClose /> : <IoMenu />}
+            {open ? (
+              <IoClose className="h-6 w-6" />
+            ) : (
+              <IoMenu className="h-6 w-6" />
+            )}
           </button>
         </div>
       </nav>
 
       {/* Panel */}
       <div className={`xl:hidden ${open ? "block" : "hidden"}`}>
-        <div className="px-3 py-2 md:px-4">
+        <div className="px-3 py-3 md:px-4">
           {/* Search */}
           <div className="relative xl:hidden">
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search events..."
-              className="bg-tertiary w-full rounded-lg px-3 py-2 text-lg outline-none"
+              className="bg-tertiary w-full rounded-full py-2 pr-12 pl-4 outline-none"
             />
-            <div className="bg-secondary text-muted pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 rounded-md px-2 py-2 text-lg">
-              <FaMagnifyingGlass />
+            <div className="text-md bg-secondary text-muted pointer-events-none absolute top-1/2 right-1 -translate-y-1/2 rounded-full p-2">
+              <IoSearch className="h-5 w-5" />
             </div>
           </div>
 
@@ -195,10 +198,11 @@ export default function Navbar({
               </Link>
             ))}
           </div>
-          <div className="border-muted mt-2 grid gap-2 border-t">
-            {rightLinks.map((l, i) => (
+
+          <div className="mt-2 grid gap-2">
+            {rightLinks.map((l) => (
               <Link
-                key={i}
+                key={l.href}
                 href={l.href}
                 className={[
                   "mt-2 w-full rounded-lg px-3 py-2 text-xl",
