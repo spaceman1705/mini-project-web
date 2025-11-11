@@ -5,6 +5,7 @@ import { useSnackbar } from "notistack";
 import { verificationLinkService } from "@/services/auth";
 import registerSchema from "../schema";
 import { useState } from "react";
+import Link from "next/link";
 
 interface IRegister {
   email: string;
@@ -33,45 +34,68 @@ export default function RegisterForm() {
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50">
-      <div className="flex flex-col gap-4 w-80 bg-white p-6 rounded-xl shadow">
-        <h2 className="text-2xl font-semibold text-center mb-2">Register</h2>
+    <div className="min-h-screen w-full flex items-center justify-center bg-secondary px-4 py-8">
+      <div className="w-full max-w-md">
+        <div className="bg-tertiary rounded-2xl shadow-xl p-8">
+          <h1 className="text-3xl font-bold text-center mb-2 text-transparent bg-clip-text bg-linear-to-r/oklch from-accent1-primary to-accent2-primary">
+            Create Account
+          </h1>
+          <p className="text-center text-muted mb-8">
+            Join evora and start exploring events
+          </p>
 
-        <Formik<IRegister>
-          initialValues={initialValue}
-          validationSchema={registerSchema}
-          onSubmit={handleSubmit}
-        >
-          {(props: FormikProps<IRegister>) => (
-            <Form className="flex flex-col gap-4">
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium">Email</label>
-                <input
-                  className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  type="email"
-                  name="email"
-                  placeholder="Masukkan email kamu"
-                  value={props.values.email}
-                  onChange={props.handleChange}
-                />
-                {props.touched.email && props.errors.email && (
-                  <span className="text-red-500 text-sm">
-                    *{props.errors.email}
-                  </span>
-                )}
-              </div>
+          <Formik<IRegister>
+            initialValues={initialValue}
+            validationSchema={registerSchema}
+            onSubmit={handleSubmit}
+          >
+            {(props: FormikProps<IRegister>) => (
+              <Form className="space-y-6">
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-muted mb-2"
+                  >
+                    Email
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    name="email"
+                    placeholder="your@email.com"
+                    value={props.values.email}
+                    onChange={props.handleChange}
+                    onBlur={props.handleBlur}
+                    className="w-full bg-secondary border border-tertiary rounded-lg px-4 py-3 text-clear outline-none focus:border-accent1-primary transition"
+                  />
+                  {props.touched.email && props.errors.email && (
+                    <p className="mt-2 text-red-500 text-sm">
+                      {props.errors.email}
+                    </p>
+                  )}
+                </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className={`bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition ${loading ? "opacity-70 cursor-not-allowed" : ""
-                  }`}
-              >
-                {loading ? "Mengirim..." : "Daftar"}
-              </button>
-            </Form>
-          )}
-        </Formik>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-linear-to-r/oklch from-accent1-primary to-accent2-primary text-white font-semibold py-3 rounded-lg hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? "Sending verification link..." : "Register"}
+                </button>
+              </Form>
+            )}
+          </Formik>
+
+          <p className="text-center text-muted text-sm mt-6">
+            Already have an account?{" "}
+            <Link
+              href="/auth/login"
+              className="text-accent1-primary font-semibold hover:underline"
+            >
+              Login
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

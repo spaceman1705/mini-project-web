@@ -19,7 +19,7 @@ interface CustomSession extends DefaultSession {
     lastname: string;
     role: string;
   };
-  accessToken: string;
+  access_token: string; // Ganti dari accessToken
   error?: string;
 }
 
@@ -29,7 +29,9 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
     if (!token.refreshToken) throw new Error("No refresh token");
 
     const data = await refreshTokenService(token.refreshToken);
-    const { accessToken, refreshToken } = data?.body ?? {};
+
+    // Token ada di data.data level (sesuai backend response)
+    const { accessToken, refreshToken } = data?.data ?? {};
 
     if (!accessToken) throw new Error("No access token from refresh");
 
@@ -74,10 +76,22 @@ const handler = NextAuth({
             credentials.email,
             credentials.password,
           );
-          const { accessToken, refreshToken } = data?.body ?? {};
 
-          if (!accessToken)
+          // DEBUG: Log response dari backend
+          console.log("Backend response:", JSON.stringify(data, null, 2));
+
+          // Token ada di data.data level (sesuai backend response)
+          const accessToken = data?.data?.accessToken;
+          const refreshToken = data?.data?.refreshToken;
+
+          // DEBUG: Log extracted tokens
+          console.log("Access Token:", accessToken ? "EXISTS" : "MISSING");
+          console.log("Refresh Token:", refreshToken ? "EXISTS" : "MISSING");
+
+          if (!accessToken) {
+            console.error("Full response:", data);
             throw new Error("Invalid access token from backend");
+          }
 
           const decoded = jwtDecode<DecodedToken>(accessToken);
 
@@ -144,7 +158,7 @@ const handler = NextAuth({
             lastname: "",
             role: "",
           },
-          accessToken: "",
+          access_token: "", // Ganti dari accessToken
           error: token.error,
         };
       }
@@ -158,7 +172,7 @@ const handler = NextAuth({
           lastname: token.lastname ?? "",
           role: token.role ?? "",
         },
-        accessToken: token.accessToken ?? "",
+        access_token: token.accessToken ?? "", // Ganti dari accessToken
         error: token.error ?? undefined,
       };
     },
