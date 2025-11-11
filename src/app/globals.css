@@ -9,12 +9,18 @@
   --color-primary: hsl(0 0% 80%);
   --color-secondary: hsl(0 0% 90%);
   --color-tertiary: hsl(0 0% 100%);
+  --color-primary-invert: hsl(0 0% 0%);
+  --color-secondary-invert: hsl(0 0% 10%);
+  --color-tertiary-invert: hsl(0 0% 20%);
   --color-clear: hsl(0 0% 5%);
   --color-muted: hsl(0 0% 30%);
+  --color-clear-invert: hsl(0 0% 95%);
+  --color-muted-invert: hsl(0 0% 70%);
   --color-accent1-primary: hsl(245 50% 50%);
   --color-accent1-hover: hsl(245 50% 75%);
   --color-accent2-primary: hsl(310 50% 50%);
   --color-accent2-hover: hsl(310 50% 75%);
+  --color-lines: hsl(0 0% 0% / 15%);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -24,10 +30,16 @@
     --color-primary: hsl(0 0% 0%);
     --color-secondary: hsl(0 0% 10%);
     --color-tertiary: hsl(0 0% 20%);
+    --color-primary-invert: hsl(0 0% 80%);
+    --color-secondary-invert: hsl(0 0% 90%);
+    --color-tertiary-invert: hsl(0 0% 100%);
     --color-clear: hsl(0 0% 95%);
     --color-muted: hsl(0 0% 70%);
+    --color-clear-invert: hsl(0 0% 5%);
+    --color-muted-invert: hsl(0 0% 30%);
     --color-accent1-hover: hsl(245 50% 25%);
     --color-accent2-hover: hsl(310 50% 25%);
+    --color-lines: hsl(0 0% 100% / 10%);
   }
 }
 
