@@ -14,7 +14,6 @@ import {
 } from "react-icons/pi";
 import { IoFastFoodOutline } from "react-icons/io5";
 
-// --- Types
 export type EventCategory =
   | "Music"
   | "Nightlife"
@@ -29,15 +28,14 @@ type EventItem = {
   id: string;
   title: string;
   category: EventCategory;
-  location: string; // city / area
-  date: string; // ISO
-  price: number | null; // null = free
+  location: string;
+  date: string;
+  price: number | null;
   tags?: ("Online" | "Family" | "Limited")[];
 };
 
 type TimeFilter = "all" | "today" | "this-weekend" | "this-month" | "upcoming";
 
-// --- Dummy seed (replace later with API)
 const seed: EventItem[] = [
   {
     id: "e1",
@@ -157,7 +155,6 @@ const seed: EventItem[] = [
   },
 ];
 
-// --- Categories (icon + label)
 const CATEGORIES: { title: EventCategory; icon: ReactNode }[] = [
   { title: "Music", icon: <PiMicrophoneStage className="size-6" /> },
   { title: "Nightlife", icon: <PiDiscoBall className="size-6" /> },
@@ -169,10 +166,9 @@ const CATEGORIES: { title: EventCategory; icon: ReactNode }[] = [
   { title: "Food & Drink", icon: <IoFastFoodOutline className="size-6" /> },
 ];
 
-// --- Helpers
 function isWithinRange(d: Date, kind: TimeFilter) {
   const now = new Date();
-  const day = d.getDay(); // 0 Sun .. 6 Sat
+  const day = d.getDay();
   const startOfToday = new Date(
     now.getFullYear(),
     now.getMonth(),
@@ -190,7 +186,6 @@ function isWithinRange(d: Date, kind: TimeFilter) {
   if (kind === "all") return true;
   if (kind === "today") return d >= startOfToday && d <= endOfToday;
   if (kind === "this-weekend") {
-    // Sat(6) or Sun(0) of current week
     return day === 6 || day === 0;
   }
   if (kind === "this-month") {
@@ -203,7 +198,6 @@ function isWithinRange(d: Date, kind: TimeFilter) {
 }
 
 export default function LandingPage() {
-  // --- Filter state
   const [keyword, setKeyword] = useState("");
   const [location, setLocation] = useState("");
   const [activeCategory, setActiveCategory] = useState<EventCategory | "All">(
@@ -212,7 +206,6 @@ export default function LandingPage() {
   const [time, setTime] = useState<TimeFilter>("upcoming");
   const [onlyFree, setOnlyFree] = useState(false);
 
-  // --- Derived list
   const events = useMemo(() => {
     return seed
       .filter((e) =>
@@ -353,13 +346,13 @@ export default function LandingPage() {
               onClick={() => setTime("upcoming")}
               className={`text-muted rounded-md border border-black/15 px-3 py-1 dark:border-white/10 ${time === "upcoming" ? "from-accent1-hover to-accent2-hover bg-linear-to-r" : "bg-tertiary"}`}
             >
-              Semua yang akan datang
+              All upcoming events
             </button>
             <button
               onClick={() => setTime("today")}
               className={`text-muted rounded-md border border-black/15 px-3 py-1 dark:border-white/10 ${time === "today" ? "from-accent1-hover to-accent2-hover bg-linear-to-r" : "bg-tertiary"}`}
             >
-              Hari ini
+              Today
             </button>
             <button
               onClick={() => setTime("this-weekend")}
@@ -371,7 +364,7 @@ export default function LandingPage() {
               onClick={() => setTime("this-month")}
               className={`text-muted rounded-md border border-black/15 px-3 py-1 dark:border-white/10 ${time === "this-month" ? "from-accent1-hover to-accent2-hover bg-linear-to-r" : "bg-tertiary"}`}
             >
-              Bulan ini
+              This Month
             </button>
           </div>
         </div>
@@ -388,7 +381,7 @@ export default function LandingPage() {
             {events.map((e) => (
               <article
                 key={e.id}
-                className="group bg-secondary flex h-full flex-col overflow-hidden rounded-2xl border border-black/15 transition hover:-translate-y-0.5 dark:border-white/10"
+                className="group bg-secondary flex h-full flex-col overflow-hidden rounded-2xl border border-black/15 dark:border-white/10"
               >
                 <div className="bg-tertiary relative h-40 w-full" />
 
@@ -432,7 +425,7 @@ export default function LandingPage() {
                     </div>
                   )}
 
-                  <button className="bg-tertiary mt-auto w-full rounded-xl border border-black/15 py-2 text-sm font-medium transition dark:border-white/10">
+                  <button className="bg-tertiary mt-auto w-full cursor-pointer rounded-xl border border-black/15 py-2 text-sm font-medium transition dark:border-white/10">
                     View Details
                   </button>
                 </div>
