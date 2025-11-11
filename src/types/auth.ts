@@ -4,14 +4,42 @@ export interface DecodedToken {
   lastname: string;
   role: string;
   exp: number;
+  iat: number;
 }
 
-export interface TokenType {
-  email?: string | null;
-  firstname?: string | null;
-  lastname?: string | null;
-  role?: string | null;
-  accessToken?: string | null;
-  refreshToken?: string | null;
-  error?: string | null;
+// Extend NextAuth types
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      email: string;
+      firstname: string;
+      lastname: string;
+      role: string;
+    };
+    access_token: string; // Ganti dari accessToken untuk hindari konflik
+    error?: string;
+  }
+
+  interface User {
+    id: string;
+    email: string;
+    firstname: string;
+    lastname: string;
+    role: string;
+    accessToken: string;
+    refreshToken: string;
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    email?: string;
+    firstname?: string;
+    lastname?: string;
+    role?: string;
+    accessToken?: string;
+    refreshToken?: string;
+    error?: string;
+  }
 }

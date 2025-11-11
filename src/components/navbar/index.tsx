@@ -3,23 +3,38 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
-import { IoClose, IoMenu, IoSearch } from "react-icons/io5";
-
-export type Role = "admin" | "organizer" | "customer" | "guest";
+import { IoClose, IoMenu, IoSearch, IoLogOut, IoPersonCircle } from "react-icons/io5";
+import { useSession, signOut } from "next-auth/react";
 
 type NavbarProps = {
-  role?: Role;
   brand?: string;
 };
 
-export default function Navbar({
-  role = "admin",
-  brand = "evora",
-}: NavbarProps) {
+export default function Navbar({ brand = "evora" }: NavbarProps) {
   const pathname = usePathname();
-
+  const { data: session, status } = useSession();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
+
+  // Map role dari backend (UPPERCASE) ke format yang diharapkan (lowercase)
+  const getUserRole = (): "admin" | "organizer" | "customer" | "guest" => {
+    if (!session?.user?.role) return "guest";
+
+    const backendRole = session.user.role.toUpperCase();
+
+    switch (backendRole) {
+      case "ADMIN":
+        return "admin";
+      case "ORGANIZER":
+        return "organizer";
+      case "CUSTOMER":
+        return "customer";
+      default:
+        return "guest";
+    }
+  };
+
+  const role = getUserRole();
 
   const common = useMemo(
     () => [
@@ -31,7 +46,7 @@ export default function Navbar({
 
   const guest = useMemo(
     () => [
-      { label: "Login", href: "/login" },
+      { label: "Login", href: "/auth/login" },
       { label: "Register", href: "/auth/register" },
     ],
     [],
@@ -78,18 +93,21 @@ export default function Navbar({
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
-    return !!pathname && pathname.startsWith(href);
+    return pathname?.startsWith(href);
+  };
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: "/" });
   };
 
   return (
     <header className="bg-secondary sticky top-0 z-50 w-full">
-      {/* Brand */}
       <nav className="mx-auto flex h-14 items-center justify-between gap-4 px-3 md:h-16 md:px-4">
         {/* Left */}
-        <div className="flex gap-4">
+        <div className="flex gap-4 items-center">
           <Link
             href="/"
-            className="from-accent1-primary to-accent2-primary bg-linear-to-r/oklch bg-clip-text text-4xl font-semibold tracking-tight text-transparent"
+            className="text-4xl font-semibold text-transparent bg-clip-text bg-linear-to-r/oklch from-accent1-primary to-accent2-primary tracking-tight"
           >
             {brand}
           </Link>
@@ -115,8 +133,7 @@ export default function Navbar({
         </div>
 
         {/* Right */}
-        <div className="flex gap-4">
-          {/* Search */}
+        <div className="flex gap-4 items-center">
           <div className="hidden min-w-md flex-1 items-center xl:flex">
             <div className="relative w-full">
               <input
@@ -131,26 +148,50 @@ export default function Navbar({
             </div>
           </div>
 
-          {/* Right links (desktop) */}
-          <ul className="ml-2 hidden items-center gap-2 xl:flex">
-            {rightLinks.map((l) => (
-              <li key={l.href}>
-                <Link
-                  href={l.href}
-                  className={[
-                    "text-muted rounded-lg px-3 py-2 text-sm font-semibold transition duration-300",
-                    isActive(l.href)
-                      ? "from-accent1-hover to-accent2-hover bg-linear-to-r/oklch"
-                      : "hover:from-accent1-hover hover:to-accent2-hover hover:bg-linear-to-r/oklch",
-                  ].join(" ")}
-                >
-                  {l.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {/* User Info & Logout (jika sudah login) */}
+          {status === "authenticated" && session?.user && (
+            <div className="hidden xl:flex items-center gap-3">
+              <div className="flex items-center gap-2 bg-tertiary rounded-lg px-3 py-2">
+                <IoPersonCircle className="h-5 w-5 text-muted" />
+                <span className="text-sm text-muted font-medium">
+                  {session.user.firstname} {session.user.lastname}
+                </span>
+                <span className="text-xs text-muted/60">
+                  ({session.user.email})
+                </span>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white rounded-lg px-3 py-2 text-sm font-semibold transition duration-300"
+              >
+                <IoLogOut className="h-4 w-4" />
+                Logout
+              </button>
+            </div>
+          )}
 
-          {/* Toggle menu */}
+          {/* Right links (desktop) - hanya tampil jika belum login */}
+          {status !== "authenticated" && (
+            <ul className="ml-2 hidden items-center gap-2 xl:flex">
+              {rightLinks.map((l) => (
+                <li key={l.href}>
+                  <Link
+                    href={l.href}
+                    className={[
+                      "text-muted rounded-lg px-3 py-2 text-sm font-semibold transition duration-300",
+                      isActive(l.href)
+                        ? "from-accent1-hover to-accent2-hover bg-linear-to-r/oklch"
+                        : "hover:from-accent1-hover hover:to-accent2-hover hover:bg-linear-to-r/oklch",
+                    ].join(" ")}
+                  >
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {/* Mobile Menu Toggle */}
           <button
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
@@ -166,7 +207,7 @@ export default function Navbar({
         </div>
       </nav>
 
-      {/* Panel */}
+      {/* Mobile Panel */}
       <div className={`xl:hidden ${open ? "block" : "hidden"}`}>
         <div className="px-3 py-3 md:px-4">
           {/* Search */}
@@ -182,7 +223,31 @@ export default function Navbar({
             </div>
           </div>
 
-          {/* Links */}
+          {/* User Info (Mobile) */}
+          {status === "authenticated" && session?.user && (
+            <div className="mt-4 bg-tertiary rounded-lg p-3">
+              <div className="flex items-center gap-2 mb-3">
+                <IoPersonCircle className="h-6 w-6 text-muted" />
+                <div className="flex flex-col">
+                  <span className="text-sm text-muted font-medium">
+                    {session.user.firstname} {session.user.lastname}
+                  </span>
+                  <span className="text-xs text-muted/60">
+                    {session.user.email}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white rounded-lg px-3 py-2 text-sm font-semibold"
+              >
+                <IoLogOut className="h-4 w-4" />
+                Logout
+              </button>
+            </div>
+          )}
+
+          {/* Common Links (Mobile) */}
           <div className="grid gap-2 sm:hidden">
             {common.map((l) => (
               <Link
@@ -199,6 +264,7 @@ export default function Navbar({
             ))}
           </div>
 
+          {/* Right Links (Mobile) */}
           <div className="mt-2 grid gap-2">
             {rightLinks.map((l) => (
               <Link

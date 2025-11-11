@@ -2,8 +2,7 @@ import RegisterForm from "./components/registerForm";
 
 export default function RegisterView() {
   return (
-    <div className="flex flex-col gap-10">
-      <h1 className="text-3xl">Register</h1>
+    <div className="flex justify-center items-center min-h-screen bg-gray-50">
       <RegisterForm />
     </div>
   );

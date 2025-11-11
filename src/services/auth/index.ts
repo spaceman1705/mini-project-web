@@ -1,3 +1,4 @@
+// services/auth/index.ts
 import axios from "axios";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
@@ -9,8 +10,29 @@ export async function loginService(email: string, password: string) {
       password,
     });
 
+    // DEBUG: Log structure response dari backend
+    console.log("🔍 Login Service Response:");
+    console.log("📦 Full data:", JSON.stringify(data, null, 2));
+    console.log("🔑 Keys:", Object.keys(data));
+
+    // Cek apakah token ada di level root atau nested
+    if (data.accessToken) {
+      console.log("✅ accessToken found at root level");
+    } else if (data.body?.accessToken) {
+      console.log("✅ accessToken found at data.body level");
+    } else if (data.access_token) {
+      console.log("✅ access_token found at root level (snake_case)");
+    } else if (data.body?.access_token) {
+      console.log("✅ access_token found at data.body level (snake_case)");
+    } else if (data.data?.accessToken) {
+      console.log("✅ accessToken found at data.data level");
+    } else {
+      console.log("❌ No accessToken found in response!");
+    }
+
     return data;
   } catch (err) {
+    console.error("❌ Login Service Error:", err);
     throw err;
   }
 }
@@ -21,8 +43,10 @@ export async function refreshTokenService(token: string) {
       token,
     });
 
+    console.log("🔄 Refresh Token Response:", data);
     return data;
   } catch (err) {
+    console.error("❌ Refresh Token Error:", err);
     throw err;
   }
 }
@@ -48,7 +72,7 @@ export async function verifyService(
   firstname: string,
   lastname: string,
   password: string,
-  token: string
+  token: string,
 ) {
   try {
     const { data } = await axios.post(
@@ -62,7 +86,7 @@ export async function verifyService(
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
 
     return data;
