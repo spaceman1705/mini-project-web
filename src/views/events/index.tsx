@@ -16,9 +16,6 @@ import {
 } from "react-icons/pi";
 import { IoFastFoodOutline, IoSearch } from "react-icons/io5";
 
-// =============================
-// Types
-// =============================
 export type EventCategory =
   | "Music"
   | "Nightlife"
