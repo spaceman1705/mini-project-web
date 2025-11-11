@@ -1,64 +1,83 @@
-import NextAuth from "next-auth";
+import NextAuth, {
+  DefaultSession,
+  Session as NextAuthSession,
+} from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import { JWT } from "next-auth/jwt";
 import { isAxiosError } from "axios";
 import { jwtDecode } from "jwt-decode";
 
-import { DecodedToken, TokenType } from "@/types/auth";
+import { DecodedToken } from "@/types/auth";
 import { loginService, refreshTokenService } from "@/services/auth";
 
-async function refreshAccessToken(token: TokenType) {
-  try {
-    const data = await refreshTokenService(token.refreshToken as string);
+// Custom session interface
+interface CustomSession extends DefaultSession {
+  user: {
+    id: string;
+    email: string;
+    firstname: string;
+    lastname: string;
+    role: string;
+  };
+  accessToken: string;
+  error?: string;
+}
 
-    const { accessToken, refreshToken } = data?.body;
+// Refresh access token helper
+async function refreshAccessToken(token: JWT): Promise<JWT> {
+  try {
+    if (!token.refreshToken) throw new Error("No refresh token");
+
+    const data = await refreshTokenService(token.refreshToken);
+    const { accessToken, refreshToken } = data?.body ?? {};
+
+    if (!accessToken) throw new Error("No access token from refresh");
 
     const decoded = jwtDecode<DecodedToken>(accessToken);
 
     return {
+      ...token,
       email: decoded.email,
       firstname: decoded.firstname,
       lastname: decoded.lastname,
       role: decoded.role,
       accessToken,
       refreshToken,
-      error: null,
+      error: undefined,
     };
   } catch (err) {
+    console.error("refreshAccessToken error:", err);
     return {
-      email: null,
-      firstname: null,
-      lastname: null,
-      role: null,
-      accessToken: null,
-      refreshToken: null,
+      ...token,
       error: "RefreshTokenError",
     };
   }
 }
 
 const handler = NextAuth({
-  pages: {
-    signIn: "/auth/login",
-  },
+  secret: process.env.AUTH_SECRET,
   session: { strategy: "jwt" },
+  pages: { signIn: "/auth/login" },
+
   providers: [
     Credentials({
+      name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email", required: true },
         password: { label: "Password", type: "password", required: true },
       },
       async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
+
         try {
           const data = await loginService(
-            credentials?.email as string,
-            credentials?.password as string
+            credentials.email,
+            credentials.password,
           );
+          const { accessToken, refreshToken } = data?.body ?? {};
 
-          const { accessToken, refreshToken } = data?.body;
-
-          if (!accessToken) {
-            throw new Error("InvalidAccessToken");
-          }
+          if (!accessToken)
+            throw new Error("Invalid access token from backend");
 
           const decoded = jwtDecode<DecodedToken>(accessToken);
 
@@ -72,71 +91,75 @@ const handler = NextAuth({
             refreshToken,
           };
         } catch (err) {
-          if (isAxiosError(err)) {
-            console.log(err.response?.data);
-          }
-
+          if (isAxiosError(err))
+            console.error("Axios login error:", err.response?.data);
+          else console.error("Authorize error:", err);
           return null;
         }
       },
     }),
   ],
+
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }): Promise<JWT> {
+      // New login
       if (user) {
         return {
-          accessToken: user.accessToken,
-          refreshToken: user.refreshToken,
+          ...token,
           email: user.email,
           firstname: user.firstname,
           lastname: user.lastname,
           role: user.role,
+          accessToken: user.accessToken,
+          refreshToken: user.refreshToken,
+          error: undefined,
         };
       }
 
-      if (!token.accessToken) {
-        return { ...token, error: "InvalidAccessToken" };
+      // Check if token expired
+      if (token.accessToken) {
+        try {
+          const decoded = jwtDecode<DecodedToken>(token.accessToken);
+          const isExpired = decoded.exp * 1000 < Date.now();
+          if (!isExpired) return token;
+
+          // Refresh token
+          return await refreshAccessToken(token);
+        } catch {
+          return { ...token, error: "InvalidAccessToken" };
+        }
       }
 
-      let decoded: DecodedToken;
-
-      try {
-        decoded = jwtDecode<DecodedToken>(token.accessToken as string);
-      } catch {
-        return { ...token, error: "InvalidAccessToken" };
-      }
-
-      const isExpired = decoded.exp * 1000 < Date.now();
-      if (!isExpired) return token;
-
-      return await refreshAccessToken(token);
+      return token;
     },
 
-    async session({ session, token }) {
-      if (
-        !token ||
-        token.error === "RefreshTokenError" ||
-        token.error === "InvalidAccessToken"
-      ) {
+    async session({ session, token }): Promise<CustomSession> {
+      if (token.error) {
         return {
           ...session,
-          user: null,
-          accessToken: null,
-          error: token?.error ?? "SessionExpired",
-          expires: session.expires,
+          user: {
+            id: "",
+            email: "",
+            firstname: "",
+            lastname: "",
+            role: "",
+          },
+          accessToken: "",
+          error: token.error,
         };
       }
 
       return {
         ...session,
         user: {
-          email: token.email,
-          firstname: token.firstname,
-          lastname: token.lastname,
-          role: token.role,
+          id: token.email ?? "",
+          email: token.email ?? "",
+          firstname: token.firstname ?? "",
+          lastname: token.lastname ?? "",
+          role: token.role ?? "",
         },
-        accessToken: token.accessToken,
-        error: token.error ?? null,
+        accessToken: token.accessToken ?? "",
+        error: token.error ?? undefined,
       };
     },
   },

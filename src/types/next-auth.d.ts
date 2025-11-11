@@ -17,12 +17,10 @@ declare module "next-auth" {
       firstname: string;
       lastname: string;
       role: string;
-    } | null;
+    };
     accessToken?: string | null;
     error?: string | null;
   }
-
-  type AdapterUser = User;
 }
 
 declare module "next-auth/jwt" {
@@ -30,7 +28,7 @@ declare module "next-auth/jwt" {
     email?: string | null;
     firstname?: string | null;
     lastname?: string | null;
-    role?: string | null;
+    role?: string;
     accessToken?: string | null;
     refreshToken?: string | null;
     error?: string | null;

@@ -5,10 +5,10 @@ import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import { IoClose, IoMenu, IoSearch } from "react-icons/io5";
 
+// Sesuaikan dengan CustomSession
 export type Role = "admin" | "organizer" | "customer" | "guest";
 
 type NavbarProps = {
-  role?: Role;
   brand?: string;
 };
 
@@ -17,7 +17,7 @@ export default function Navbar({
   brand = "evora",
 }: NavbarProps) {
   const pathname = usePathname();
-
+  const { data: session, status } = useSession();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
 
@@ -78,7 +78,7 @@ export default function Navbar({
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
-    return !!pathname && pathname.startsWith(href);
+    return pathname?.startsWith(href);
   };
 
   return (
@@ -86,10 +86,10 @@ export default function Navbar({
       {/* Brand */}
       <nav className="mx-auto flex h-14 items-center justify-between gap-4 px-3 md:h-16 md:px-4">
         {/* Left */}
-        <div className="flex gap-4">
+        <div className="flex gap-4 items-center">
           <Link
             href="/"
-            className="from-accent1-primary to-accent2-primary bg-linear-to-r/oklch bg-clip-text text-4xl font-semibold tracking-tight text-transparent"
+            className="text-4xl font-semibold text-transparent bg-clip-text bg-linear-to-r/oklch from-accent1-primary to-accent2-primary tracking-tight"
           >
             {brand}
           </Link>
@@ -115,8 +115,7 @@ export default function Navbar({
         </div>
 
         {/* Right */}
-        <div className="flex gap-4">
-          {/* Search */}
+        <div className="flex gap-4 items-center">
           <div className="hidden min-w-md flex-1 items-center xl:flex">
             <div className="relative w-full">
               <input
@@ -150,7 +149,7 @@ export default function Navbar({
             ))}
           </ul>
 
-          {/* Toggle menu */}
+          {/* Mobile Menu Toggle */}
           <button
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
@@ -215,7 +214,7 @@ export default function Navbar({
             ))}
           </div>
         </div>
-      </div>
+      )}
     </header>
   );
 }
