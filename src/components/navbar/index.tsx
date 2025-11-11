@@ -10,7 +10,14 @@ type NavbarProps = {
   brand?: string;
 };
 
+<<<<<<< HEAD
+export default function Navbar({
+  role = "admin",
+  brand = "evora",
+}: NavbarProps) {
+=======
 export default function Navbar({ brand = "evora" }: NavbarProps) {
+>>>>>>> main
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const [open, setOpen] = useState(false);
