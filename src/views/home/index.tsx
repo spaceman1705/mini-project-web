@@ -243,7 +243,7 @@ export default function LandingPage() {
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
                   placeholder="Find events (e.g. Music)"
-                  className="bg-tertiary h-12 rounded-xl border border-black/15 px-4 outline-none dark:border-white/10"
+                  className="bg-tertiary border-lines h-12 rounded-xl border px-4 outline-none"
                 />
                 <div className="relative">
                   <PiMapPin className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2" />
@@ -251,26 +251,26 @@ export default function LandingPage() {
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     placeholder="Location (e.g. Jakarta)"
-                    className="bg-tertiary h-12 w-full rounded-xl border border-black/15 pr-3 pl-8 outline-none dark:border-white/10"
+                    className="bg-tertiary border-lines h-12 w-full rounded-xl border pr-3 pl-8 outline-none"
                   />
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setTime("today")}
-                  className={`h-12 rounded-xl border border-black/15 px-4 text-sm font-medium dark:border-white/10 ${time === "today" ? "from-accent1-hover to-accent2-hover text-muted bg-linear-to-r" : "bg-tertiary"}`}
+                  className={`border-lines h-12 rounded-xl border px-4 text-sm font-medium ${time === "today" ? "from-accent1-hover to-accent2-hover text-muted bg-linear-to-r" : "bg-tertiary"}`}
                 >
                   Today
                 </button>
                 <button
                   onClick={() => setTime("this-weekend")}
-                  className={`h-12 rounded-xl border border-black/15 px-4 text-sm font-medium dark:border-white/10 ${time === "this-weekend" ? "from-accent1-hover to-accent2-hover text-muted bg-linear-to-r" : "bg-tertiary"}`}
+                  className={`border-lines h-12 rounded-xl border px-4 text-sm font-medium ${time === "this-weekend" ? "from-accent1-hover to-accent2-hover text-muted bg-linear-to-r" : "bg-tertiary"}`}
                 >
                   Weekend
                 </button>
                 <button
                   onClick={() => setTime("this-month")}
-                  className={`h-12 rounded-xl border border-black/15 px-4 text-sm font-medium dark:border-white/10 ${time === "this-month" ? "from-accent1-hover to-accent2-hover text-muted bg-linear-to-r" : "bg-tertiary"}`}
+                  className={`border-lines h-12 rounded-xl border px-4 text-sm font-medium ${time === "this-month" ? "from-accent1-hover to-accent2-hover text-muted bg-linear-to-r" : "bg-tertiary"}`}
                 >
                   This Month
                 </button>
@@ -318,7 +318,7 @@ export default function LandingPage() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
           <button
             onClick={() => setActiveCategory("All")}
-            className={`text-muted flex items-center gap-2 rounded-xl border border-black/15 p-3 text-sm dark:border-white/10 ${activeCategory === "All" ? "from-accent1-hover to-accent2-hover bg-linear-to-r" : "bg-tertiary"}`}
+            className={`text-muted border-lines flex items-center gap-2 rounded-xl border p-3 text-sm ${activeCategory === "All" ? "from-accent1-hover to-accent2-hover bg-linear-to-r" : "bg-tertiary"}`}
           >
             <span className="inline-block size-6 rounded-full border border-white" />
             <span>All</span>
@@ -327,7 +327,7 @@ export default function LandingPage() {
             <button
               key={c.title}
               onClick={() => setActiveCategory(c.title)}
-              className={`text-muted flex items-center gap-2 rounded-xl border border-black/15 p-3 text-sm dark:border-white/10 ${activeCategory === c.title ? "from-accent1-hover to-accent2-hover bg-linear-to-r" : "bg-tertiary"}`}
+              className={`text-muted border-lines flex items-center gap-2 rounded-xl border p-3 text-sm ${activeCategory === c.title ? "from-accent1-hover to-accent2-hover bg-linear-to-r" : "bg-tertiary"}`}
               title={c.title}
             >
               {c.icon}
@@ -344,25 +344,25 @@ export default function LandingPage() {
           <div className="flex gap-2 text-sm">
             <button
               onClick={() => setTime("upcoming")}
-              className={`text-muted rounded-md border border-black/15 px-3 py-1 dark:border-white/10 ${time === "upcoming" ? "from-accent1-hover to-accent2-hover bg-linear-to-r" : "bg-tertiary"}`}
+              className={`text-muted border-lines rounded-md border px-3 py-1 ${time === "upcoming" ? "from-accent1-hover to-accent2-hover bg-linear-to-r" : "bg-tertiary"}`}
             >
               All upcoming events
             </button>
             <button
               onClick={() => setTime("today")}
-              className={`text-muted rounded-md border border-black/15 px-3 py-1 dark:border-white/10 ${time === "today" ? "from-accent1-hover to-accent2-hover bg-linear-to-r" : "bg-tertiary"}`}
+              className={`text-muted border-lines rounded-md border px-3 py-1 ${time === "today" ? "from-accent1-hover to-accent2-hover bg-linear-to-r" : "bg-tertiary"}`}
             >
               Today
             </button>
             <button
               onClick={() => setTime("this-weekend")}
-              className={`text-muted rounded-md border border-black/15 px-3 py-1 dark:border-white/10 ${time === "this-weekend" ? "from-accent1-hover to-accent2-hover bg-linear-to-r" : "bg-tertiary"}`}
+              className={`text-muted border-lines rounded-md border px-3 py-1 ${time === "this-weekend" ? "from-accent1-hover to-accent2-hover bg-linear-to-r" : "bg-tertiary"}`}
             >
               Weekend
             </button>
             <button
               onClick={() => setTime("this-month")}
-              className={`text-muted rounded-md border border-black/15 px-3 py-1 dark:border-white/10 ${time === "this-month" ? "from-accent1-hover to-accent2-hover bg-linear-to-r" : "bg-tertiary"}`}
+              className={`text-muted border-lines rounded-md border px-3 py-1 ${time === "this-month" ? "from-accent1-hover to-accent2-hover bg-linear-to-r" : "bg-tertiary"}`}
             >
               This Month
             </button>
@@ -381,7 +381,7 @@ export default function LandingPage() {
             {events.map((e) => (
               <article
                 key={e.id}
-                className="group bg-secondary flex h-full flex-col overflow-hidden rounded-2xl border border-black/15 dark:border-white/10"
+                className="group bg-secondary border-lines flex h-full flex-col overflow-hidden rounded-2xl border"
               >
                 <div className="bg-tertiary relative h-40 w-full" />
 
@@ -417,7 +417,7 @@ export default function LandingPage() {
                       {e.tags.map((t) => (
                         <span
                           key={t}
-                          className="text-muted rounded-md border border-black/15 px-2 py-0.5 text-xs dark:border-white/10"
+                          className="text-muted border-lines rounded-md border px-2 py-0.5 text-xs"
                         >
                           {t}
                         </span>
@@ -425,7 +425,7 @@ export default function LandingPage() {
                     </div>
                   )}
 
-                  <button className="bg-tertiary mt-auto w-full cursor-pointer rounded-xl border border-black/15 py-2 text-sm font-medium transition dark:border-white/10">
+                  <button className="bg-tertiary border-lines mt-auto w-full cursor-pointer rounded-xl border py-2 text-sm font-medium transition">
                     View Details
                   </button>
                 </div>
@@ -447,12 +447,12 @@ export default function LandingPage() {
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="bg-secondary rounded-2xl border border-black/15 p-4 dark:border-white/10"
+              className="bg-secondary border-lines rounded-2xl border p-4"
             >
               <div className="bg-tertiary h-16 w-16 rounded-xl" />
               <div className="mt-3 font-medium">Organizer {i + 1}</div>
               <div className="text-muted text-sm">12 event · ★ 4.{i + 1}</div>
-              <button className="bg-tertiary mt-3 w-full rounded-xl border border-black/15 py-2 text-sm dark:border-white/10">
+              <button className="bg-tertiary border-lines mt-3 w-full rounded-xl border py-2 text-sm">
                 Visit
               </button>
             </div>
@@ -465,12 +465,12 @@ export default function LandingPage() {
         <h3 className="text-xl font-semibold md:text-2xl">
           Get the latest event updates
         </h3>
-        <p className="mt-1 text-black/60">
+        <p className="text-muted mt-1">
           Enter your email to receive weekly updates on popular events.
         </p>
         <form className="mx-auto mt-4 flex max-w-md gap-2">
           <input
-            className="bg-tertiary h-12 flex-1 rounded-xl border border-black/15 px-4 dark:border-white/10"
+            className="bg-tertiary border-lines h-12 flex-1 rounded-xl border px-4"
             placeholder="your@email.com"
           />
           <button className="h-12 rounded-xl bg-black px-5 text-white">
