@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
-import { IoClose, IoMenu, IoSearch, IoLogOut, IoPersonCircle } from "react-icons/io5";
+import {
+  IoClose,
+  IoMenu,
+  IoSearch,
+  IoLogOut,
+  IoPersonCircle,
+} from "react-icons/io5";
 import { useSession, signOut } from "next-auth/react";
 
 type NavbarProps = {
@@ -111,10 +117,10 @@ export default function Navbar({ brand = "evora" }: NavbarProps) {
     <header className="bg-secondary sticky top-0 z-50 w-full">
       <nav className="mx-auto flex h-14 items-center justify-between gap-4 px-3 md:h-16 md:px-4">
         {/* Left */}
-        <div className="flex gap-4 items-center">
+        <div className="flex items-center gap-4">
           <Link
             href="/"
-            className="text-4xl font-semibold text-transparent bg-clip-text bg-linear-to-r/oklch from-accent1-primary to-accent2-primary tracking-tight"
+            className="from-accent1-primary to-accent2-primary bg-linear-to-r/oklch bg-clip-text text-4xl font-semibold tracking-tight text-transparent"
           >
             {brand}
           </Link>
@@ -140,7 +146,7 @@ export default function Navbar({ brand = "evora" }: NavbarProps) {
         </div>
 
         {/* Right */}
-        <div className="flex gap-4 items-center">
+        <div className="flex items-center gap-4">
           <div className="hidden min-w-md flex-1 items-center xl:flex">
             <div className="relative w-full">
               <input
@@ -157,19 +163,19 @@ export default function Navbar({ brand = "evora" }: NavbarProps) {
 
           {/* User Info & Logout (jika sudah login) */}
           {status === "authenticated" && session?.user && (
-            <div className="hidden xl:flex items-center gap-3">
-              <div className="flex items-center gap-2 bg-tertiary rounded-lg px-3 py-2">
-                <IoPersonCircle className="h-5 w-5 text-muted" />
-                <span className="text-sm text-muted font-medium">
+            <div className="hidden items-center gap-3 xl:flex">
+              <div className="bg-tertiary flex items-center gap-2 rounded-lg px-3 py-2">
+                <IoPersonCircle className="text-muted h-5 w-5" />
+                <span className="text-muted text-sm font-medium">
                   {session.user.firstname} {session.user.lastname}
                 </span>
-                <span className="text-xs text-muted/60">
+                <span className="text-muted/60 text-xs">
                   ({session.user.email})
                 </span>
               </div>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white rounded-lg px-3 py-2 text-sm font-semibold transition duration-300"
+                className="flex items-center gap-2 rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-red-700"
               >
                 <IoLogOut className="h-4 w-4" />
                 Logout
@@ -232,21 +238,21 @@ export default function Navbar({ brand = "evora" }: NavbarProps) {
 
           {/* User Info (Mobile) */}
           {status === "authenticated" && session?.user && (
-            <div className="mt-4 bg-tertiary rounded-lg p-3">
-              <div className="flex items-center gap-2 mb-3">
-                <IoPersonCircle className="h-6 w-6 text-muted" />
+            <div className="bg-tertiary mt-4 rounded-lg p-3">
+              <div className="mb-3 flex items-center gap-2">
+                <IoPersonCircle className="text-muted h-6 w-6" />
                 <div className="flex flex-col">
-                  <span className="text-sm text-muted font-medium">
+                  <span className="text-muted text-sm font-medium">
                     {session.user.firstname} {session.user.lastname}
                   </span>
-                  <span className="text-xs text-muted/60">
+                  <span className="text-muted/60 text-xs">
                     {session.user.email}
                   </span>
                 </div>
               </div>
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white rounded-lg px-3 py-2 text-sm font-semibold"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700"
               >
                 <IoLogOut className="h-4 w-4" />
                 Logout
