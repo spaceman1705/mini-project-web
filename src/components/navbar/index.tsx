@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo, useState, useRef, useEffect } from "react";
-import { IoClose, IoMenu, IoSearch, IoLogOut, IoPersonCircle, IoChevronDown } from "react-icons/io5";
+import { IoClose, IoMenu, IoSearch, IoLogOut, IoPersonCircle, IoChevronDown, IoGridOutline } from "react-icons/io5";
 import { useSession, signOut } from "next-auth/react";
 
 type NavbarProps = {
@@ -71,6 +71,7 @@ export default function Navbar({ brand = "evora" }: NavbarProps) {
 
   const customer = useMemo(
     () => [
+      { label: "Dashboard", href: "/me/dashboard" },
       { label: "Tickets", href: "/me/tickets" },
       { label: "Transactions", href: "/me/transactions" },
       { label: "Profile", href: "/me/profile" },
@@ -129,6 +130,20 @@ export default function Navbar({ brand = "evora" }: NavbarProps) {
         return "/me/profile";
       default:
         return "/auth/login";
+    }
+  };
+
+  // Get dashboard link based on role
+  const getDashboardLink = () => {
+    switch (role) {
+      case "admin":
+        return "/adm/dashboard";
+      case "organizer":
+        return "/org/dashboard";
+      case "customer":
+        return "/me/dashboard";
+      default:
+        return "/";
     }
   };
 
@@ -217,6 +232,15 @@ export default function Navbar({ brand = "evora" }: NavbarProps) {
                     </div>
 
                     <div className="py-2">
+                      <Link
+                        href={getDashboardLink()}
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2 text-sm text-muted hover:bg-secondary transition cursor-pointer"
+                      >
+                        <IoGridOutline className="h-5 w-5" />
+                        Dashboard
+                      </Link>
+
                       <Link
                         href={getProfileLink()}
                         onClick={() => setDropdownOpen(false)}
@@ -312,6 +336,15 @@ export default function Navbar({ brand = "evora" }: NavbarProps) {
               </div>
 
               <div className="space-y-2">
+                <Link
+                  href={getDashboardLink()}
+                  onClick={() => setOpen(false)}
+                  className="w-full flex items-center justify-center gap-2 bg-secondary text-muted rounded-lg px-3 py-2 text-sm font-semibold hover:bg-secondary/80 transition"
+                >
+                  <IoGridOutline className="h-4 w-4" />
+                  Dashboard
+                </Link>
+
                 <Link
                   href={getProfileLink()}
                   onClick={() => setOpen(false)}
