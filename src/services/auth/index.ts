@@ -94,3 +94,25 @@ export async function verifyService(
     throw err;
   }
 }
+
+export async function apiFetch(
+  endpoint: string,
+  token?: string,
+  options: RequestInit = {},
+) {
+  const res = await fetch(`${baseUrl}/profile`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers || {}),
+    },
+  });
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.message || `Request failed: ${res.status}`);
+  }
+
+  return res.json();
+}
