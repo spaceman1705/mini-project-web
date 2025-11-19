@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
     IoTicket,
@@ -14,10 +14,38 @@ import {
     IoArrowForward,
     IoSearch
 } from "react-icons/io5";
+import { getCustomerStats, getCustomerUpcomingEvents } from "@/services/dashboard";
+
+// Type definitions
+interface CustomerStats {
+    activeTickets: number;
+    upcomingEvents: number;
+    favorites: number;
+}
+
+interface UpcomingEvent {
+    id: string;
+    title: string;
+    slug: string;
+    category: string;
+    location: string;
+    startDate: string;
+    endDate: string;
+    bannerImg?: string;
+    ticketCount?: number;
+}
 
 export default function CustomerDashboard() {
     const { data: session, status } = useSession();
     const router = useRouter();
+
+    const [stats, setStats] = useState<CustomerStats>({
+        activeTickets: 0,
+        upcomingEvents: 0,
+        favorites: 0
+    });
+    const [upcomingEvents, setUpcomingEvents] = useState<UpcomingEvent[]>([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (status === "unauthenticated") {
@@ -25,10 +53,56 @@ export default function CustomerDashboard() {
         }
     }, [status, router]);
 
-    if (status === "loading") {
+    useEffect(() => {
+        async function fetchData() {
+            if (!session?.access_token) return;
+
+            try {
+                setLoading(true);
+
+                // Fetch stats
+                const statsResponse = await getCustomerStats(session.access_token);
+                if (statsResponse?.data) {
+                    setStats({
+                        activeTickets: statsResponse.data.activeTickets || 0,
+                        upcomingEvents: statsResponse.data.upcomingEvents || 0,
+                        favorites: statsResponse.data.favorites || 0
+                    });
+                }
+
+                // Fetch upcoming events
+                const eventsResponse = await getCustomerUpcomingEvents(session.access_token);
+                if (eventsResponse?.data && Array.isArray(eventsResponse.data)) {
+                    setUpcomingEvents(eventsResponse.data);
+                }
+            } catch (error) {
+                console.error("Error fetching dashboard data:", error);
+                // Set default values on error
+                setStats({ activeTickets: 0, upcomingEvents: 0, favorites: 0 });
+                setUpcomingEvents([]);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        if (session?.access_token) {
+            fetchData();
+        }
+    }, [session?.access_token]);
+
+    useEffect(() => {
+        if (status === "unauthenticated") {
+            router.push("/auth/login");
+        }
+    }, [status, router]);
+
+    if (status === "loading" || loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-secondary">
-                <div className="text-muted">Loading...</div>
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent1-primary mx-auto mb-4"></div>
+                    <div className="text-muted">Loading dashboard...</div>
+                </div>
             </div>
         );
     }
@@ -37,32 +111,10 @@ export default function CustomerDashboard() {
         return null;
     }
 
-    // Mock data - nanti diganti dengan real API calls
-    const upcomingEvents = [
-        {
-            id: 1,
-            title: "Tech Conference 2024",
-            date: "2024-12-25",
-            time: "09:00 AM",
-            location: "Jakarta Convention Center",
-            image: "https://via.placeholder.com/400x200",
-            category: "Technology"
-        },
-        {
-            id: 2,
-            title: "Music Festival",
-            date: "2024-12-30",
-            time: "06:00 PM",
-            location: "GBK Stadium",
-            image: "https://via.placeholder.com/400x200",
-            category: "Music"
-        }
-    ];
-
-    const stats = [
-        { label: "Active Tickets", value: "2", icon: IoTicket, color: "accent1" },
-        { label: "Upcoming Events", value: "3", icon: IoCalendar, color: "accent2" },
-        { label: "Favorites", value: "5", icon: IoHeart, color: "red" }
+    const statsData = [
+        { label: "Active Tickets", value: stats.activeTickets.toString(), icon: IoTicket, color: "accent1" },
+        { label: "Upcoming Events", value: stats.upcomingEvents.toString(), icon: IoCalendar, color: "accent2" },
+        { label: "Favorites", value: stats.favorites.toString(), icon: IoHeart, color: "red" }
     ];
 
     return (
@@ -75,12 +127,12 @@ export default function CustomerDashboard() {
                             {session.user.firstname}
                         </span>! 👋
                     </h1>
-                    <p className="text-muted">Here's what's happening with your events</p>
+                    <p className="text-muted">Here&#39;s what&#39;s happening with your events</p>
                 </div>
 
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    {stats.map((stat, index) => (
+                    {statsData.map((stat, index) => (
                         <div key={index} className="bg-tertiary rounded-2xl shadow-xl p-6">
                             <div className="flex items-center justify-between">
                                 <div>
@@ -109,57 +161,60 @@ export default function CustomerDashboard() {
                         </div>
 
                         <div className="space-y-4">
-                            {upcomingEvents.map((event) => (
-                                <div key={event.id} className="bg-tertiary rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition">
-                                    <div className="flex flex-col md:flex-row">
-                                        <div className="w-full md:w-48 h-48 md:h-auto bg-gradient-to-br from-accent1-primary to-accent2-primary"></div>
-                                        <div className="flex-1 p-6">
-                                            <div className="flex items-start justify-between mb-3">
-                                                <div>
-                                                    <span className="text-xs bg-accent1-primary/10 text-accent1-primary px-3 py-1 rounded-full font-semibold">
-                                                        {event.category}
-                                                    </span>
-                                                    <h3 className="text-xl font-bold text-clear mt-2">{event.title}</h3>
+                            {upcomingEvents.length > 0 ? (
+                                upcomingEvents.map((event) => (
+                                    <div key={event.id} className="bg-tertiary rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition">
+                                        <div className="flex flex-col md:flex-row">
+                                            <div className="w-full md:w-48 h-48 md:h-auto bg-gradient-to-br from-accent1-primary to-accent2-primary"></div>
+                                            <div className="flex-1 p-6">
+                                                <div className="flex items-start justify-between mb-3">
+                                                    <div>
+                                                        <span className="text-xs bg-accent1-primary/10 text-accent1-primary px-3 py-1 rounded-full font-semibold">
+                                                            {event.category}
+                                                        </span>
+                                                        <h3 className="text-xl font-bold text-clear mt-2">{event.title}</h3>
+                                                    </div>
+                                                    <button className="text-red-500 hover:text-red-600">
+                                                        <IoHeart className="h-6 w-6" />
+                                                    </button>
                                                 </div>
-                                                <button className="text-red-500 hover:text-red-600">
-                                                    <IoHeart className="h-6 w-6" />
-                                                </button>
-                                            </div>
 
-                                            <div className="space-y-2 mb-4">
-                                                <div className="flex items-center gap-2 text-muted text-sm">
-                                                    <IoCalendar className="h-4 w-4" />
-                                                    {new Date(event.date).toLocaleDateString('en-US', {
-                                                        weekday: 'long',
-                                                        year: 'numeric',
-                                                        month: 'long',
-                                                        day: 'numeric'
-                                                    })}
+                                                <div className="space-y-2 mb-4">
+                                                    <div className="flex items-center gap-2 text-muted text-sm">
+                                                        <IoCalendar className="h-4 w-4" />
+                                                        {new Date(event.startDate).toLocaleDateString('en-US', {
+                                                            weekday: 'long',
+                                                            year: 'numeric',
+                                                            month: 'long',
+                                                            day: 'numeric'
+                                                        })}
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-muted text-sm">
+                                                        <IoTime className="h-4 w-4" />
+                                                        {new Date(event.startDate).toLocaleTimeString('en-US', {
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        })}
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-muted text-sm">
+                                                        <IoLocation className="h-4 w-4" />
+                                                        {event.location}
+                                                    </div>
                                                 </div>
-                                                <div className="flex items-center gap-2 text-muted text-sm">
-                                                    <IoTime className="h-4 w-4" />
-                                                    {event.time}
-                                                </div>
-                                                <div className="flex items-center gap-2 text-muted text-sm">
-                                                    <IoLocation className="h-4 w-4" />
-                                                    {event.location}
-                                                </div>
-                                            </div>
 
-                                            <div className="flex gap-3">
-                                                <button className="flex-1 bg-linear-to-r/oklch from-accent1-primary to-accent2-primary text-white font-semibold py-2 rounded-lg hover:opacity-90 transition">
-                                                    View Ticket
-                                                </button>
-                                                <button className="px-4 bg-secondary text-muted font-semibold py-2 rounded-lg hover:bg-secondary/80 transition">
-                                                    Details
-                                                </button>
+                                                <div className="flex gap-3">
+                                                    <button className="flex-1 bg-linear-to-r/oklch from-accent1-primary to-accent2-primary text-white font-semibold py-2 rounded-lg hover:opacity-90 transition">
+                                                        View Ticket
+                                                    </button>
+                                                    <button className="px-4 bg-secondary text-muted font-semibold py-2 rounded-lg hover:bg-secondary/80 transition">
+                                                        Details
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
-
-                            {upcomingEvents.length === 0 && (
+                                ))
+                            ) : (
                                 <div className="bg-tertiary rounded-2xl shadow-xl p-12 text-center">
                                     <IoTicket className="h-16 w-16 text-muted/30 mx-auto mb-4" />
                                     <p className="text-muted mb-4">No upcoming events yet</p>
