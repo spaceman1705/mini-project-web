@@ -2,14 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo, useState } from "react";
-import {
-  IoClose,
-  IoMenu,
-  IoSearch,
-  IoLogOut,
-  IoPersonCircle,
-} from "react-icons/io5";
+import { useMemo, useState, useRef, useEffect } from "react";
+import { IoClose, IoMenu, IoSearch, IoLogOut, IoPersonCircle, IoChevronDown, IoGridOutline } from "react-icons/io5";
 import { useSession, signOut } from "next-auth/react";
 
 type NavbarProps = {
@@ -20,7 +14,24 @@ export default function Navbar({ brand = "evora" }: NavbarProps) {
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const [open, setOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [q, setQ] = useState("");
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+
+    if (dropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [dropdownOpen]);
 
   // Map role dari backend (UPPERCASE) ke format yang diharapkan (lowercase)
   const getUserRole = (): "admin" | "organizer" | "customer" | "guest" => {
@@ -60,6 +71,7 @@ export default function Navbar({ brand = "evora" }: NavbarProps) {
 
   const customer = useMemo(
     () => [
+      { label: "Dashboard", href: "/me/dashboard" },
       { label: "Tickets", href: "/me/tickets" },
       { label: "Transactions", href: "/me/transactions" },
       { label: "Profile", href: "/me/profile" },
@@ -103,17 +115,46 @@ export default function Navbar({ brand = "evora" }: NavbarProps) {
   };
 
   const handleLogout = async () => {
+    setDropdownOpen(false);
     await signOut({ callbackUrl: "/" });
+  };
+
+  // Get profile link based on role
+  const getProfileLink = () => {
+    switch (role) {
+      case "admin":
+        return "/adm/profile";
+      case "organizer":
+        return "/org/profile";
+      case "customer":
+        return "/me/profile";
+      default:
+        return "/auth/login";
+    }
+  };
+
+  // Get dashboard link based on role
+  const getDashboardLink = () => {
+    switch (role) {
+      case "admin":
+        return "/adm/dashboard";
+      case "organizer":
+        return "/org/dashboard";
+      case "customer":
+        return "/me/dashboard";
+      default:
+        return "/";
+    }
   };
 
   return (
     <header className="bg-secondary sticky top-0 z-50 w-full">
       <nav className="mx-auto flex h-14 items-center justify-between gap-4 px-3 md:h-16 md:px-4">
         {/* Left */}
-        <div className="flex items-center gap-4">
+        <div className="flex gap-4 items-center">
           <Link
             href="/"
-            className="from-accent1-primary to-accent2-primary bg-linear-to-r/oklch bg-clip-text text-4xl font-semibold tracking-tight text-transparent"
+            className="text-4xl font-semibold text-transparent bg-clip-text bg-linear-to-r/oklch from-accent1-primary to-accent2-primary tracking-tight"
           >
             {brand}
           </Link>
@@ -139,7 +180,7 @@ export default function Navbar({ brand = "evora" }: NavbarProps) {
         </div>
 
         {/* Right */}
-        <div className="flex items-center gap-4">
+        <div className="flex gap-4 items-center">
           <div className="hidden min-w-md flex-1 items-center xl:flex">
             <div className="relative w-full">
               <input
@@ -156,23 +197,70 @@ export default function Navbar({ brand = "evora" }: NavbarProps) {
 
           {/* User Info & Logout (jika sudah login) */}
           {status === "authenticated" && session?.user && (
-            <div className="hidden items-center gap-3 xl:flex">
-              <div className="bg-tertiary flex items-center gap-2 rounded-lg px-3 py-2">
-                <IoPersonCircle className="text-muted h-5 w-5" />
-                <span className="text-muted text-sm font-medium">
-                  {session.user.firstname} {session.user.lastname}
-                </span>
-                <span className="text-muted/60 text-xs">
-                  ({session.user.email})
-                </span>
+            <div className="hidden xl:flex items-center gap-3 relative">
+              {/* User Dropdown */}
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center gap-2 bg-tertiary rounded-lg px-3 py-2 hover:bg-tertiary/80 transition cursor-pointer"
+                >
+                  <IoPersonCircle className="h-5 w-5 text-muted" />
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm text-muted font-medium">
+                      {session.user.firstname} {session.user.lastname}
+                    </span>
+                    <span className="text-xs text-muted/60">
+                      {session.user.email}
+                    </span>
+                  </div>
+                  <IoChevronDown
+                    className={`h-4 w-4 text-muted transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                {/* Dropdown Menu */}
+                {dropdownOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-tertiary rounded-lg shadow-2xl border border-secondary overflow-hidden z-[100]">
+                    <div className="p-3 border-b border-secondary">
+                      <p className="text-sm font-semibold text-clear">
+                        {session.user.firstname} {session.user.lastname}
+                      </p>
+                      <p className="text-xs text-muted/60">{session.user.email}</p>
+                      <p className="text-xs text-accent1-primary font-medium mt-1 capitalize">
+                        {session.user.role}
+                      </p>
+                    </div>
+
+                    <div className="py-2">
+                      <Link
+                        href={getDashboardLink()}
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2 text-sm text-muted hover:bg-secondary transition cursor-pointer"
+                      >
+                        <IoGridOutline className="h-5 w-5" />
+                        Dashboard
+                      </Link>
+
+                      <Link
+                        href={getProfileLink()}
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2 text-sm text-muted hover:bg-secondary transition cursor-pointer"
+                      >
+                        <IoPersonCircle className="h-5 w-5" />
+                        View Profile
+                      </Link>
+
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-secondary transition cursor-pointer"
+                      >
+                        <IoLogOut className="h-5 w-5" />
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white transition duration-300 hover:bg-red-700"
-              >
-                <IoLogOut className="h-4 w-4" />
-                Logout
-              </button>
             </div>
           )}
 
@@ -231,25 +319,49 @@ export default function Navbar({ brand = "evora" }: NavbarProps) {
 
           {/* User Info (Mobile) */}
           {status === "authenticated" && session?.user && (
-            <div className="bg-tertiary mt-4 rounded-lg p-3">
-              <div className="mb-3 flex items-center gap-2">
-                <IoPersonCircle className="text-muted h-6 w-6" />
-                <div className="flex flex-col">
-                  <span className="text-muted text-sm font-medium">
+            <div className="mt-4 bg-tertiary rounded-lg p-3">
+              <div className="flex items-center gap-2 mb-3">
+                <IoPersonCircle className="h-6 w-6 text-muted" />
+                <div className="flex flex-col flex-1">
+                  <span className="text-sm text-muted font-medium">
                     {session.user.firstname} {session.user.lastname}
                   </span>
-                  <span className="text-muted/60 text-xs">
+                  <span className="text-xs text-muted/60">
                     {session.user.email}
+                  </span>
+                  <span className="text-xs text-accent1-primary font-medium mt-1 capitalize">
+                    {session.user.role}
                   </span>
                 </div>
               </div>
-              <button
-                onClick={handleLogout}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700"
-              >
-                <IoLogOut className="h-4 w-4" />
-                Logout
-              </button>
+
+              <div className="space-y-2">
+                <Link
+                  href={getDashboardLink()}
+                  onClick={() => setOpen(false)}
+                  className="w-full flex items-center justify-center gap-2 bg-secondary text-muted rounded-lg px-3 py-2 text-sm font-semibold hover:bg-secondary/80 transition"
+                >
+                  <IoGridOutline className="h-4 w-4" />
+                  Dashboard
+                </Link>
+
+                <Link
+                  href={getProfileLink()}
+                  onClick={() => setOpen(false)}
+                  className="w-full flex items-center justify-center gap-2 bg-secondary text-muted rounded-lg px-3 py-2 text-sm font-semibold hover:bg-secondary/80 transition"
+                >
+                  <IoPersonCircle className="h-4 w-4" />
+                  View Profile
+                </Link>
+
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white rounded-lg px-3 py-2 text-sm font-semibold"
+                >
+                  <IoLogOut className="h-4 w-4" />
+                  Logout
+                </button>
+              </div>
             </div>
           )}
 
