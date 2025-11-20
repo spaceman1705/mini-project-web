@@ -1,34 +1,19 @@
 import EventsViewClient, { type EventsViewInitialData } from "./components";
 import type { EventListResponse } from "@/types/event";
+import { getEvents } from "@/services/event";
 
 const defaultPage = 1;
 const defaultPageSize = 12;
 
 async function fetchInitialEvents(): Promise<EventsViewInitialData | null> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-
-  if (!baseUrl) {
-    console.error("NEXT_PUBLIC_API_URL is not set in .env.local");
-    return null;
-  }
-
   try {
-    const params = new URLSearchParams();
-    params.set("page", String(defaultPage));
-    params.set("pageSize", String(defaultPageSize));
-    params.set("sort", "newest");
-
-    const res = await fetch(`${baseUrl}/events?${params.toString()}`, {
-      next: { revalidate: 60 },
+    const response: EventListResponse = await getEvents({
+      page: defaultPage,
+      pageSize: defaultPageSize,
+      sort: "newest",
     });
 
-    if (!res.ok) {
-      console.error("[Events] Gagal fetch events, status:", res.status);
-      return null;
-    }
-
-    const json = (await res.json()) as EventListResponse;
-    const data = json.data;
+    const data = response.data;
 
     return {
       items: data.items,
