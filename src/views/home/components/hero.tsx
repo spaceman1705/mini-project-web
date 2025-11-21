@@ -71,7 +71,7 @@ export default function HeroSection({
                   key={item.value}
                   type="button"
                   onClick={() => onTimeFilterChange(item.value)}
-                  className={`border-lines text-muted h-10 rounded-xl px-4 text-sm ${
+                  className={`border-lines text-muted h-10 rounded-xl px-4 text-sm transition ${
                     timeFilter === item.value
                       ? "from-accent1-hover to-accent2-hover bg-linear-to-r"
                       : "bg-tertiary"
@@ -91,8 +91,8 @@ export default function HeroSection({
                 onChange={(e) => onOnlyFreeChange(e.target.checked)}
                 className="border-lines size-4 rounded border"
               />
-              <span>Show free events only</span>
             </label>
+            <span>Show free events only</span>
 
             <span className="flex items-center gap-2">
               <PiClock className="text-sm" />
@@ -101,7 +101,6 @@ export default function HeroSection({
           </div>
         </div>
 
-        {/* Visual / mock banner */}
         <div className="from-accent1 to-accent2-hover mt-6 h-48 flex-1 rounded-2xl bg-linear-to-br p-1 md:mt-0 md:h-64">
           <div className="bg-tertiary flex h-full w-full items-center justify-center rounded-2xl">
             <p className="text-muted text-center text-sm">Banner</p>

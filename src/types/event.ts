@@ -12,6 +12,8 @@ export type EventCategory =
   | "Business"
   | "Food & Drink";
 
+export type EventTag = "Online" | "Family" | "Limited";
+
 export type EventListItem = {
   id: string;
   title: string;
@@ -165,10 +167,12 @@ export type CreateVoucherPayload = {
 
 export type HomeEvent = {
   id: string;
+  slug: string;
   title: string;
   category: EventCategory;
   location: string;
   date: string;
   price: number | null;
   bannerImg?: string | null;
+  tags?: EventTag[];
 };

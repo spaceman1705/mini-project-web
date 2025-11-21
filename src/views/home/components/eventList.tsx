@@ -40,10 +40,10 @@ export default function EventListSection({
               key={item.value}
               type="button"
               onClick={() => onTimeFilterChange(item.value)}
-              className={`rounded-full px-3 py-1 ${
+              className={`rounded-full px-3 py-1 text-xs ${
                 timeFilter === item.value
                   ? "bg-black text-white"
-                  : "bg-tertiary text-muted border-lines border"
+                  : "border-lines bg-tertiary text-muted border"
               }`}
             >
               {item.label}
@@ -118,7 +118,7 @@ export default function EventListSection({
 
               <div className="mt-4 flex items-center justify-between gap-2">
                 <Link
-                  href={`/events/${event.id}`}
+                  href={`/events/${event.slug}`}
                   className="bg-primary border-lines hover:bg-tertiary inline-flex w-full items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium transition"
                 >
                   View details

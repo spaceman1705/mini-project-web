@@ -5,8 +5,7 @@ import type { EventCategory, HomeEvent } from "@/types/event";
 
 import HeroSection from "./hero";
 import CategorySection from "./category";
-import EventListSection, { TimeFilter } from "./eventList";
-import TopOrganizersSection from "./topOrganizer";
+import EventListSection, { type TimeFilter } from "./eventList";
 import SubscribeSection from "./newsLetter";
 
 export type HomeViewClientProps = {
@@ -37,7 +36,7 @@ function isWithinRange(date: Date, filter: TimeFilter): boolean {
   }
 
   if (filter === "this-weekend") {
-    const day = date.getDay(); // 0: Sunday, 6: Saturday
+    const day = date.getDay();
     return day === 0 || day === 6;
   }
 
@@ -110,8 +109,6 @@ export default function HomeViewClient({ initialEvents }: HomeViewClientProps) {
         timeFilter={timeFilter}
         onTimeFilterChange={setTimeFilter}
       />
-
-      {/* <TopOrganizersSection /> */}
 
       <SubscribeSection />
     </div>

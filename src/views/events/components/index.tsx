@@ -5,13 +5,15 @@ import type {
   EventCategory,
   EventListItem,
   EventListResponse,
+  EventTag,
+  GetEventsParams,
 } from "@/types/event";
 
 import SearchBar from "./searchBar";
 import FiltersBar from "./filters";
 import EventsGrid from "./eventGrid";
 
-import { getEvents, type GetEventsParams } from "@/services/event";
+import { getEvents } from "@/services/event";
 
 export type TimeFilter =
   | "all"
@@ -20,7 +22,7 @@ export type TimeFilter =
   | "this-month"
   | "upcoming";
 
-export type Tag = "Online" | "Family" | "Limited";
+export type Tag = EventTag;
 
 export type SortOption = "newest" | "oldest" | "price_asc" | "price_desc";
 
@@ -128,7 +130,7 @@ export default function EventsViewClient({
   }, [events]);
 
   useEffect(() => {
-    const controller = new AbortController();
+    let cancelled = false;
 
     async function loadEvents() {
       setLoading(true);
@@ -172,18 +174,16 @@ export default function EventsViewClient({
           params.sort = sort;
         }
 
-        const json: EventListResponse = await getEvents(params, {
-          signal: controller.signal,
-        });
+        const json: EventListResponse = await getEvents(params);
         const data = json.data;
+
+        if (cancelled) return;
 
         setEvents(data.items.map(mapToUiEvent));
         setTotal(data.total);
         setTotalPages(data.totalPages);
       } catch (err: unknown) {
-        if (err instanceof DOMException && err.name === "AbortError") {
-          return;
-        }
+        if (cancelled) return;
 
         console.error("[Events] Error saat load events:", err);
 
@@ -195,13 +195,17 @@ export default function EventsViewClient({
         setTotal(0);
         setTotalPages(1);
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
     loadEvents();
 
-    return () => controller.abort();
+    return () => {
+      cancelled = true;
+    };
   }, [page, debouncedQ, category, location, time, freeOnly, sort]);
 
   const activeTags = useMemo(
