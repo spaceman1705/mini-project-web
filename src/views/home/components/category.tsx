@@ -1,43 +1,15 @@
-import type { ReactNode } from "react";
-import {
-  PiMicrophoneStage,
-  PiDiscoBall,
-  PiMaskHappy,
-  PiCalendarHeart,
-  PiChats,
-  PiGameController,
-  PiPresentationChart,
-} from "react-icons/pi";
-import { IoFastFoodOutline } from "react-icons/io5";
-
-import type { EventCategory } from "@/types/event";
-
 type CategorySectionProps = {
-  activeCategory: EventCategory | "All";
-  onCategoryChange: (value: EventCategory | "All") => void;
+  activeCategory: string | "All";
+  onCategoryChange: (value: string | "All") => void;
   totalEvents: number;
+  categories: string[];
 };
-
-type CategoryItem = {
-  title: EventCategory;
-  icon: ReactNode;
-};
-
-const CATEGORIES: CategoryItem[] = [
-  { title: "Music", icon: <PiMicrophoneStage className="size-6" /> },
-  { title: "Nightlife", icon: <PiDiscoBall className="size-6" /> },
-  { title: "Art", icon: <PiMaskHappy className="size-6" /> },
-  { title: "Holiday", icon: <PiCalendarHeart className="size-6" /> },
-  { title: "Dating", icon: <PiChats className="size-6" /> },
-  { title: "Hobby", icon: <PiGameController className="size-6" /> },
-  { title: "Business", icon: <PiPresentationChart className="size-6" /> },
-  { title: "Food & Drink", icon: <IoFastFoodOutline className="size-6" /> },
-];
 
 export default function CategorySection({
   activeCategory,
   onCategoryChange,
   totalEvents,
+  categories,
 }: CategorySectionProps) {
   return (
     <section className="mt-10">
@@ -52,30 +24,28 @@ export default function CategorySection({
         <button
           type="button"
           onClick={() => onCategoryChange("All")}
-          className={`text-muted border-lines flex items-center gap-2 rounded-2xl border px-3 py-2 text-sm transition ${
+          className={`text-muted border-lines flex items-center gap-2 rounded-2xl border px-3 py-2 text-sm shadow-lg transition ${
             activeCategory === "All"
               ? "from-accent1-hover to-accent2-hover bg-linear-to-r"
               : "bg-tertiary"
           }`}
         >
-          <span className="inline-block size-6 rounded-full border border-white" />
-          <span>All</span>
+          All
         </button>
 
-        {CATEGORIES.map((category) => (
+        {categories.map((category) => (
           <button
-            key={category.title}
+            key={category}
             type="button"
-            onClick={() => onCategoryChange(category.title)}
-            className={`text-muted border-lines flex items-center gap-2 rounded-2xl border px-3 py-2 text-sm transition ${
-              activeCategory === category.title
+            onClick={() => onCategoryChange(category)}
+            className={`text-muted border-lines flex items-center gap-2 rounded-2xl border px-3 py-2 text-sm shadow-lg transition ${
+              activeCategory === category
                 ? "from-accent1-hover to-accent2-hover bg-linear-to-r"
                 : "bg-tertiary"
             }`}
-            title={category.title}
+            title={category}
           >
-            {category.icon}
-            <span className="truncate">{category.title}</span>
+            <span className="truncate">{category}</span>
           </button>
         ))}
       </div>

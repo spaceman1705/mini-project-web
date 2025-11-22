@@ -1,21 +1,29 @@
 import HomeViewClient from "./components";
-import type { HomeEvent, EventCategory, EventTag } from "@/types/event";
-import { getEvents } from "@/services/event";
+import type { HomeEvent, EventTag } from "@/types/event";
+import { getEvents, getEventCategories } from "@/services/event";
 
 const defaultPage = 1;
 const defaultPageSize = 8;
 
-async function fetchHomeEvents(): Promise<HomeEvent[]> {
+type HomeInitialData = {
+  events: HomeEvent[];
+  categories: string[];
+};
+
+async function fetchHomeData(): Promise<HomeInitialData> {
   try {
-    const res = await getEvents({
-      page: defaultPage,
-      pageSize: defaultPageSize,
-      sort: "newest",
-    });
+    const [eventsRes, categoriesRes] = await Promise.all([
+      getEvents({
+        page: defaultPage,
+        pageSize: defaultPageSize,
+        sort: "newest",
+      }),
+      getEventCategories(),
+    ]);
 
-    const items = res.data?.items ?? [];
+    const items = eventsRes.data?.items ?? [];
 
-    const mapped: HomeEvent[] = items.map((event) => {
+    const mappedEvents: HomeEvent[] = items.map((event) => {
       const tags: EventTag[] = [];
 
       if (event.location.toLowerCase() === "online") {
@@ -33,7 +41,7 @@ async function fetchHomeEvents(): Promise<HomeEvent[]> {
         id: event.id,
         slug: event.slug,
         title: event.title,
-        category: (event.category as EventCategory) ?? "Music",
+        category: event.category || "Other",
         location: event.location,
         date: event.startDate,
         price: event.price ?? null,
@@ -42,15 +50,27 @@ async function fetchHomeEvents(): Promise<HomeEvent[]> {
       };
     });
 
-    return mapped;
+    const categories = Array.isArray(categoriesRes.data)
+      ? categoriesRes.data
+      : [];
+
+    return {
+      events: mappedEvents,
+      categories,
+    };
   } catch (err) {
-    console.error("[Home] Error while fetching events:", err);
-    return [];
+    console.error("[Home] Error while fetching initial data:", err);
+    return {
+      events: [],
+      categories: [],
+    };
   }
 }
 
 export default async function HomeView() {
-  const events = await fetchHomeEvents();
+  const { events, categories } = await fetchHomeData();
 
-  return <HomeViewClient initialEvents={events} />;
+  return (
+    <HomeViewClient initialEvents={events} initialCategories={categories} />
+  );
 }

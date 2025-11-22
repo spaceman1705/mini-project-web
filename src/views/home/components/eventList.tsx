@@ -64,7 +64,7 @@ export default function EventListSection({
           {events.map((event) => (
             <article
               key={event.id}
-              className="bg-secondary border-lines flex flex-col rounded-2xl border p-4"
+              className="bg-secondary border-lines flex h-full flex-col rounded-2xl border p-4 shadow-lg"
             >
               {/* Thumbnail placeholder */}
               <div className="bg-tertiary mb-3 h-32 w-full rounded-xl" />
@@ -116,10 +116,10 @@ export default function EventListSection({
                 </div>
               )}
 
-              <div className="mt-4 flex items-center justify-between gap-2">
+              <div className="mt-auto flex items-center justify-between gap-2">
                 <Link
                   href={`/events/${event.slug}`}
-                  className="bg-primary border-lines hover:bg-tertiary inline-flex w-full items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium transition"
+                  className="bg-primary border-lines hover:bg-tertiary mt-4 inline-flex w-full items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium transition"
                 >
                   View details
                 </Link>

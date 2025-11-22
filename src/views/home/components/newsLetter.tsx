@@ -1,6 +1,6 @@
-export default function SubscribeSection() {
+export default function NewsLetterSection() {
   return (
-    <section className="bg-secondary my-16 rounded-3xl p-8 text-center md:p-10">
+    <section className="bg-secondary mt-16 mb-4 rounded-3xl p-8 text-center shadow-lg md:p-10">
       <h3 className="text-2xl font-semibold md:text-3xl">Stay in the loop</h3>
       <p className="text-muted mx-auto mt-3 max-w-xl text-sm md:text-base">
         Enter your email to receive weekly updates on popular events, curated
