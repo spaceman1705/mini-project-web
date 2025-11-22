@@ -1,16 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { EventCategory, HomeEvent } from "@/types/event";
+import type { HomeEvent } from "@/types/event";
 
 import HeroSection from "./hero";
 import CategorySection from "./category";
-import EventListSection, { TimeFilter } from "./eventList";
-import TopOrganizersSection from "./topOrganizer";
-import SubscribeSection from "./newsLetter";
+import EventListSection, { type TimeFilter } from "./eventList";
+import NewsLetterSection from "./newsLetter";
 
 export type HomeViewClientProps = {
   initialEvents: HomeEvent[];
+  initialCategories: string[];
 };
 
 function isWithinRange(date: Date, filter: TimeFilter): boolean {
@@ -37,7 +37,7 @@ function isWithinRange(date: Date, filter: TimeFilter): boolean {
   }
 
   if (filter === "this-weekend") {
-    const day = date.getDay(); // 0: Sunday, 6: Saturday
+    const day = date.getDay();
     return day === 0 || day === 6;
   }
 
@@ -55,14 +55,15 @@ function isWithinRange(date: Date, filter: TimeFilter): boolean {
   return true;
 }
 
-export default function HomeViewClient({ initialEvents }: HomeViewClientProps) {
+export default function HomeViewClient({
+  initialEvents,
+  initialCategories,
+}: HomeViewClientProps) {
   const [keyword, setKeyword] = useState("");
   const [location, setLocation] = useState("");
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("upcoming");
   const [onlyFree, setOnlyFree] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<EventCategory | "All">(
-    "All",
-  );
+  const [activeCategory, setActiveCategory] = useState<string | "All">("All");
 
   const filteredEvents = useMemo(() => {
     return (initialEvents ?? [])
@@ -103,6 +104,7 @@ export default function HomeViewClient({ initialEvents }: HomeViewClientProps) {
         activeCategory={activeCategory}
         onCategoryChange={setActiveCategory}
         totalEvents={filteredEvents.length}
+        categories={initialCategories}
       />
 
       <EventListSection
@@ -111,9 +113,7 @@ export default function HomeViewClient({ initialEvents }: HomeViewClientProps) {
         onTimeFilterChange={setTimeFilter}
       />
 
-      {/* <TopOrganizersSection /> */}
-
-      <SubscribeSection />
+      <NewsLetterSection />
     </div>
   );
 }

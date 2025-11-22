@@ -1,59 +1,76 @@
 import HomeViewClient from "./components";
-import type {
-  EventListResponse,
-  HomeEvent,
-  EventCategory,
-} from "@/types/event";
+import type { HomeEvent, EventTag } from "@/types/event";
+import { getEvents, getEventCategories } from "@/services/event";
 
 const defaultPage = 1;
 const defaultPageSize = 8;
 
-async function fetchHomeEvents(): Promise<HomeEvent[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+type HomeInitialData = {
+  events: HomeEvent[];
+  categories: string[];
+};
 
-  if (!baseUrl) {
-    console.error("NEXT_PUBLIC_API_URL is not set in .env.local");
-    return [];
-  }
-
-  const url = `${baseUrl}/events?page=${defaultPage}&pageSize=${defaultPageSize}&sort=newest`;
-
+async function fetchHomeData(): Promise<HomeInitialData> {
   try {
-    const res = await fetch(url, {
-      cache: "no-store",
+    const [eventsRes, categoriesRes] = await Promise.all([
+      getEvents({
+        page: defaultPage,
+        pageSize: defaultPageSize,
+        sort: "newest",
+      }),
+      getEventCategories(),
+    ]);
+
+    const items = eventsRes.data?.items ?? [];
+
+    const mappedEvents: HomeEvent[] = items.map((event) => {
+      const tags: EventTag[] = [];
+
+      if (event.location.toLowerCase() === "online") {
+        tags.push("Online");
+      }
+
+      if (
+        typeof event.availableSeats === "number" &&
+        event.availableSeats <= 20
+      ) {
+        tags.push("Limited");
+      }
+
+      return {
+        id: event.id,
+        slug: event.slug,
+        title: event.title,
+        category: event.category || "Other",
+        location: event.location,
+        date: event.startDate,
+        price: event.price ?? null,
+        bannerImg: event.bannerImg ?? null,
+        tags: tags.length > 0 ? tags : undefined,
+      };
     });
 
-    if (!res.ok) {
-      console.error(
-        "[Home] Gagal mengambil events:",
-        res.status,
-        res.statusText,
-      );
-      return [];
-    }
+    const categories = Array.isArray(categoriesRes.data)
+      ? categoriesRes.data
+      : [];
 
-    const json = (await res.json()) as EventListResponse;
-    const items = json.data?.items ?? [];
-
-    const mapped: HomeEvent[] = items.map((event) => ({
-      id: event.id,
-      title: event.title,
-      category: event.category as EventCategory,
-      location: event.location,
-      date: event.startDate,
-      price: event.price,
-      bannerImg: event.bannerImg ?? null,
-    }));
-
-    return mapped;
-  } catch (error) {
-    console.error("[Home] Error saat fetch events:", error);
-    return [];
+    return {
+      events: mappedEvents,
+      categories,
+    };
+  } catch (err) {
+    console.error("[Home] Error while fetching initial data:", err);
+    return {
+      events: [],
+      categories: [],
+    };
   }
 }
 
 export default async function HomeView() {
-  const events = await fetchHomeEvents();
+  const { events, categories } = await fetchHomeData();
 
-  return <HomeViewClient initialEvents={events} />;
+  return (
+    <HomeViewClient initialEvents={events} initialCategories={categories} />
+  );
 }

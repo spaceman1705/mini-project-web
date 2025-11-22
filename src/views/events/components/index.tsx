@@ -5,11 +5,15 @@ import type {
   EventCategory,
   EventListItem,
   EventListResponse,
+  EventTag,
+  GetEventsParams,
 } from "@/types/event";
 
 import SearchBar from "./searchBar";
 import FiltersBar from "./filters";
 import EventsGrid from "./eventGrid";
+
+import { getEvents } from "@/services/event";
 
 export type TimeFilter =
   | "all"
@@ -18,7 +22,7 @@ export type TimeFilter =
   | "this-month"
   | "upcoming";
 
-export type Tag = "Online" | "Family" | "Limited";
+export type Tag = EventTag;
 
 export type SortOption = "newest" | "oldest" | "price_asc" | "price_desc";
 
@@ -45,9 +49,6 @@ export type EventsViewInitialData = {
 export type EventsViewClientProps = {
   initialData: EventsViewInitialData | null;
 };
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/api";
 
 type EventWithMeta = EventListItem & {
   availableSeats?: number | null;
@@ -94,7 +95,6 @@ function useDebouncedValue<T>(value: T, delay = 300): T {
 export default function EventsViewClient({
   initialData,
 }: EventsViewClientProps) {
-  // data awal dari server
   const [events, setEvents] = useState<UiEventItem[]>(() =>
     (initialData?.items ?? []).map(mapToUiEvent),
   );
@@ -103,7 +103,6 @@ export default function EventsViewClient({
   const [total, setTotal] = useState(initialData?.total ?? 0);
   const [totalPages, setTotalPages] = useState(initialData?.totalPages ?? 1);
 
-  // search & filter state
   const [q, setQ] = useState("");
   const debouncedQ = useDebouncedValue(q);
 
@@ -118,7 +117,6 @@ export default function EventsViewClient({
   });
   const [sort, setSort] = useState<SortOption>("newest");
 
-  // ui state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -132,20 +130,21 @@ export default function EventsViewClient({
   }, [events]);
 
   useEffect(() => {
-    const controller = new AbortController();
+    let cancelled = false;
 
     async function loadEvents() {
       setLoading(true);
       setError(null);
 
       try {
-        const params = new URLSearchParams();
-        params.set("page", String(page));
-        params.set("pageSize", "12");
+        const params: GetEventsParams = {
+          page,
+          pageSize: 12,
+        };
 
-        if (debouncedQ.trim()) params.set("q", debouncedQ.trim());
-        if (category !== "All") params.set("category", category);
-        if (location !== "All") params.set("location", location);
+        if (debouncedQ.trim()) params.q = debouncedQ.trim();
+        if (category !== "All") params.category = category;
+        if (location !== "All") params.location = location;
 
         if (time !== "all") {
           let dateParam: string | null = null;
@@ -163,36 +162,28 @@ export default function EventsViewClient({
               dateParam = "upcoming";
               break;
           }
-          if (dateParam) params.set("date", dateParam);
+          if (dateParam) params.date = dateParam;
         }
 
         if (freeOnly) {
-          params.set("minPrice", "0");
-          params.set("maxPrice", "0");
+          params.minPrice = 0;
+          params.maxPrice = 0;
         }
 
         if (sort) {
-          params.set("sort", sort);
+          params.sort = sort;
         }
 
-        const res = await fetch(`${API_BASE_URL}/events?${params.toString()}`, {
-          signal: controller.signal,
-        });
-
-        if (!res.ok) {
-          throw new Error(`Failed to load events (${res.status})`);
-        }
-
-        const json: EventListResponse = await res.json();
+        const json: EventListResponse = await getEvents(params);
         const data = json.data;
+
+        if (cancelled) return;
 
         setEvents(data.items.map(mapToUiEvent));
         setTotal(data.total);
         setTotalPages(data.totalPages);
       } catch (err: unknown) {
-        if (err instanceof DOMException && err.name === "AbortError") {
-          return;
-        }
+        if (cancelled) return;
 
         console.error("[Events] Error saat load events:", err);
 
@@ -204,16 +195,19 @@ export default function EventsViewClient({
         setTotal(0);
         setTotalPages(1);
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
     loadEvents();
 
-    return () => controller.abort();
+    return () => {
+      cancelled = true;
+    };
   }, [page, debouncedQ, category, location, time, freeOnly, sort]);
 
-  // filter tag di client-side
   const activeTags = useMemo(
     () => (Object.keys(tags) as Tag[]).filter((t) => tags[t]),
     [tags],
