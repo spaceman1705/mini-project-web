@@ -1,6 +1,6 @@
 import type { ApiResponse } from "./api";
 
-export type EventStatus = "DRAFT" | "PUBLISHED" | "CANCELED";
+export type EventStatus = "DRAFT" | "PUBLISHED" | "CANCELED" | "FINISHED";
 
 export type EventCategory =
   | "Music"
@@ -36,6 +36,9 @@ export type EventListData = {
 };
 
 export type EventListResponse = ApiResponse<EventListData>;
+
+// for /events/categories endpoint
+export type EventCategoriesResponse = ApiResponse<string[]>;
 
 export type EventDetail = {
   id: string;
@@ -169,7 +172,7 @@ export type HomeEvent = {
   id: string;
   slug: string;
   title: string;
-  category: EventCategory;
+  category: string;
   location: string;
   date: string;
   price: number | null;

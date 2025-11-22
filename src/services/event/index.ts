@@ -12,11 +12,11 @@ import type {
   UpdateEventPayload,
   TicketTypeInput,
   CreateVoucherPayload,
+  EventCategoriesResponse,
 } from "@/types/event";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
 
-// helper sama seperti di services/dashboard
 const getAuthHeader = (token: string) => ({
   Authorization: `Bearer ${token}`,
 });
@@ -199,6 +199,19 @@ export async function createVoucherApi(
     return data;
   } catch (err) {
     console.error("createVoucherApi error:", err);
+    throw err;
+  }
+}
+
+export async function getEventCategories() {
+  try {
+    const { data } = await axios.get<EventCategoriesResponse>(
+      `${baseUrl}/events/categories`,
+    );
+
+    return data;
+  } catch (err) {
+    console.error("getEventCategories error:", err);
     throw err;
   }
 }
