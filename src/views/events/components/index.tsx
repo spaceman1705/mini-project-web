@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import type {
   EventListItem,
   EventListResponse,
@@ -13,6 +14,7 @@ import FiltersBar from "./filters";
 import EventsGrid from "./eventGrid";
 
 import { getEvents } from "@/services/event";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 
 export type TimeFilter =
   | "all"
@@ -81,21 +83,14 @@ function mapToUiEvent(item: EventListItem): UiEventItem {
   };
 }
 
-function useDebouncedValue<T>(value: T, delay = 300): T {
-  const [debounced, setDebounced] = useState(value);
-
-  useEffect(() => {
-    const t = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(t);
-  }, [value, delay]);
-
-  return debounced;
-}
-
 export default function EventsViewClient({
   initialData,
   initialCategories,
 }: EventsViewClientProps) {
+  const searchParams = useSearchParams();
+
+  const initialQ = searchParams.get("q") ?? "";
+
   const [events, setEvents] = useState<UiEventItem[]>(() =>
     (initialData?.items ?? []).map(mapToUiEvent),
   );
@@ -104,7 +99,7 @@ export default function EventsViewClient({
   const [total, setTotal] = useState(initialData?.total ?? 0);
   const [totalPages, setTotalPages] = useState(initialData?.totalPages ?? 1);
 
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(initialQ);
   const debouncedQ = useDebouncedValue(q);
 
   const [category, setCategory] = useState<string | "All">("All");

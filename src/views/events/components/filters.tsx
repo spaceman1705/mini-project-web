@@ -58,13 +58,13 @@ export default function FiltersBar({
     <section className="mb-6 space-y-4">
       {/* Category chips */}
       <div className="no-scrollbar -mx-4 overflow-x-auto px-4">
-        <div className="flex gap-2">
+        <div className="flex gap-2 text-nowrap">
           {allCategories.map((cat) => (
             <button
               key={cat}
               onClick={() => onCategoryChange(cat)}
               className={
-                "border-lines flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition " +
+                "border-lines rounded-full border px-3 py-1.5 text-sm transition " +
                 (category === cat
                   ? "bg-primary-invert text-clear-invert"
                   : "bg-tertiary hover:bg-primary-invert hover:text-clear-invert")

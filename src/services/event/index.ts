@@ -1,5 +1,3 @@
-// src/services/event/index.ts
-
 import axios from "axios";
 import type { ApiResponse } from "@/types/api";
 import type {
@@ -34,7 +32,12 @@ export async function getEvents(params: GetEventsParams = {}) {
   }
 }
 
+console.log("[DEBUG] BASE URL =", baseUrl);
+
 export async function getEventDetail(slug: string) {
+  const url = `${baseUrl}/events/${slug}`;
+  console.log("[DEBUG] FETCH URL =", url);
+
   try {
     const { data } = await axios.get<EventDetailResponse>(
       `${baseUrl}/events/${slug}`,

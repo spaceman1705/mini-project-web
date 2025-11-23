@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import type { ReactNode } from "react";
 import {
   PiCalendarHeart,
   PiClock,
@@ -10,30 +9,12 @@ import {
   PiTicket,
   PiUsersThree,
   PiStarFill,
-  PiMicrophoneStage,
-  PiDiscoBall,
-  PiMaskHappy,
-  PiChats,
-  PiGameController,
-  PiPresentationChart,
 } from "react-icons/pi";
-import { IoFastFoodOutline } from "react-icons/io5";
 
-import type { EventDetail, EventCategory } from "@/types/event";
+import type { EventDetail } from "@/types/event";
 
 type EventDetailViewClientProps = {
   event: EventDetail;
-};
-
-const CATEGORY_ICONS: Record<EventCategory, ReactNode> = {
-  Music: <PiMicrophoneStage className="shrink-0" />,
-  Nightlife: <PiDiscoBall className="shrink-0" />,
-  Art: <PiMaskHappy className="shrink-0" />,
-  Holiday: <PiCalendarHeart className="shrink-0" />,
-  Dating: <PiChats className="shrink-0" />,
-  Hobby: <PiGameController className="shrink-0" />,
-  Business: <PiPresentationChart className="shrink-0" />,
-  "Food & Drink": <IoFastFoodOutline className="shrink-0" />,
 };
 
 function formatDate(dateStr: string) {
@@ -94,7 +75,8 @@ export default function EventDetailViewClient({
     event.endDate,
   );
   const { avg, count } = calcRatingInfo(event);
-  const category = (event.category as EventCategory) ?? "Music";
+
+  const categoryLabel = event.category || "Other";
 
   const isFree = event.price === 0;
   const priceLabel = isFree
@@ -128,8 +110,8 @@ export default function EventDetailViewClient({
                   className="object-cover"
                 />
               ) : (
-                <div className="text-muted flex h-full w-full items-center justify-center text-6xl">
-                  {CATEGORY_ICONS[category]}
+                <div className="text-muted flex h-full w-full items-center justify-center text-sm">
+                  No image available
                 </div>
               )}
             </div>
@@ -138,8 +120,7 @@ export default function EventDetailViewClient({
           {/* Title & meta */}
           <header className="space-y-2">
             <div className="bg-tertiary text-muted inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs">
-              <span className="text-lg">{CATEGORY_ICONS[category]}</span>
-              <span>{category}</span>
+              <span>{categoryLabel}</span>
             </div>
 
             <h1 className="text-2xl leading-tight font-semibold sm:text-3xl">
@@ -236,7 +217,7 @@ export default function EventDetailViewClient({
             </div>
           </section>
 
-          {/* Reviews (placeholder simple) */}
+          {/* Reviews */}
           <section className="bg-secondary border-lines rounded-3xl border p-4 sm:p-6">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Reviews</h2>
