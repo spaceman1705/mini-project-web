@@ -1,33 +1,13 @@
 import React from "react";
 import { PiClock, PiMapPin, PiTag } from "react-icons/pi";
-import { IoFastFoodOutline } from "react-icons/io5";
-import {
-  PiCalendarHeart,
-  PiChats,
-  PiDiscoBall,
-  PiGameController,
-  PiMaskHappy,
-  PiMicrophoneStage,
-  PiPresentationChart,
-} from "react-icons/pi";
 
-import type { EventCategory } from "@/types/event";
 import type { SortOption, Tag, TimeFilter } from "./index";
 
-const categoryIcons: Record<EventCategory, React.ReactNode> = {
-  Music: <PiMicrophoneStage className="shrink-0" />,
-  Nightlife: <PiDiscoBall className="shrink-0" />,
-  Art: <PiMaskHappy className="shrink-0" />,
-  Holiday: <PiCalendarHeart className="shrink-0" />,
-  Dating: <PiChats className="shrink-0" />,
-  Hobby: <PiGameController className="shrink-0" />,
-  Business: <PiPresentationChart className="shrink-0" />,
-  "Food & Drink": <IoFastFoodOutline className="shrink-0" />,
-};
-
 type FiltersBarProps = {
-  category: EventCategory | "All";
-  onCategoryChange: (value: EventCategory | "All") => void;
+  category: string | "All";
+  onCategoryChange: (value: string | "All") => void;
+
+  categories: string[];
 
   locations: string[];
   location: string | "All";
@@ -53,6 +33,7 @@ type FiltersBarProps = {
 export default function FiltersBar({
   category,
   onCategoryChange,
+  categories,
   locations,
   location,
   onLocationChange,
@@ -68,29 +49,20 @@ export default function FiltersBar({
   totalCount,
   onReset,
 }: FiltersBarProps) {
+  const allCategories: (string | "All")[] = [
+    "All",
+    ...categories.filter((c) => c && c.trim().length > 0),
+  ];
+
   return (
     <section className="mb-6 space-y-4">
       {/* Category chips */}
       <div className="no-scrollbar -mx-4 overflow-x-auto px-4">
         <div className="flex gap-2">
-          {(
-            [
-              "All",
-              "Music",
-              "Nightlife",
-              "Art",
-              "Holiday",
-              "Dating",
-              "Hobby",
-              "Business",
-              "Food & Drink",
-            ] as const
-          ).map((cat) => (
+          {allCategories.map((cat) => (
             <button
               key={cat}
-              onClick={() =>
-                onCategoryChange(cat === "All" ? "All" : (cat as EventCategory))
-              }
+              onClick={() => onCategoryChange(cat)}
               className={
                 "border-lines flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition " +
                 (category === cat
@@ -98,12 +70,7 @@ export default function FiltersBar({
                   : "bg-tertiary hover:bg-primary-invert hover:text-clear-invert")
               }
             >
-              {cat !== "All" && (
-                <span className="text-lg">
-                  {categoryIcons[cat as EventCategory]}
-                </span>
-              )}
-              <span>{cat}</span>
+              <span>{cat === "All" ? "All" : cat}</span>
             </button>
           ))}
         </div>
@@ -116,7 +83,7 @@ export default function FiltersBar({
           <PiMapPin className="text-muted" />
           <select
             value={location}
-            onChange={(e) => onLocationChange(e.target.value)}
+            onChange={(e) => onLocationChange(e.target.value as string | "All")}
             className="border-lines bg-tertiary rounded-lg border px-2 py-1.5 text-sm"
           >
             {locations.map((loc) => (

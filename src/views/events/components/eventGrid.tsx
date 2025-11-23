@@ -1,20 +1,9 @@
 import React from "react";
 import Link from "next/link";
 import { PiClock, PiMapPin } from "react-icons/pi";
-import {
-  PiCalendarHeart,
-  PiChats,
-  PiDiscoBall,
-  PiGameController,
-  PiMaskHappy,
-  PiMicrophoneStage,
-  PiPresentationChart,
-} from "react-icons/pi";
-import { IoFastFoodOutline } from "react-icons/io5";
-
-import type { EventCategory } from "@/types/event";
-import type { UiEventItem } from "./index";
 import Image from "next/image";
+
+import type { UiEventItem } from "./index";
 
 type EventsGridProps = {
   events: UiEventItem[];
@@ -23,17 +12,6 @@ type EventsGridProps = {
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
-};
-
-const CATEGORY_ICONS: Record<EventCategory, React.ReactNode> = {
-  Music: <PiMicrophoneStage className="shrink-0" />,
-  Nightlife: <PiDiscoBall className="shrink-0" />,
-  Art: <PiMaskHappy className="shrink-0" />,
-  Holiday: <PiCalendarHeart className="shrink-0" />,
-  Dating: <PiChats className="shrink-0" />,
-  Hobby: <PiGameController className="shrink-0" />,
-  Business: <PiPresentationChart className="shrink-0" />,
-  "Food & Drink": <IoFastFoodOutline className="shrink-0" />,
 };
 
 function formatDateTime(dateStr: string) {
@@ -98,8 +76,8 @@ export default function EventsGrid({
                     className="object-cover"
                   />
                 ) : (
-                  <div className="text-muted absolute inset-0 flex items-center justify-center text-5xl">
-                    {CATEGORY_ICONS[e.category]}
+                  <div className="text-muted absolute inset-0 flex items-center justify-center text-xs">
+                    No image
                   </div>
                 )}
               </div>
