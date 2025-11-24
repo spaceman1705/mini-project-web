@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useSnackbar } from "notistack";
+import { useSession } from "next-auth/react";
 
 import { createEventApi, getEventCategories } from "@/services/event";
 import type { CreateEventPayload } from "@/types/event";
@@ -54,24 +55,19 @@ function isAxiosError(
 }
 
 export default function OrganizerEventCreateViews() {
+  const { data: session, status } = useSession(); // ✅ ambil session NextAuth
   const [categories, setCategories] = useState<string[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
-
-  const [token, setToken] = useState<string | null>(null);
-
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const router = useRouter();
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    const storedToken =
-      typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
-    if (storedToken) {
-      setToken(storedToken);
+    if (status === "unauthenticated") {
+      router.push("/auth/login");
     }
-  }, []);
+  }, [status, router]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -129,6 +125,9 @@ export default function OrganizerEventCreateViews() {
     validateOnChange: false,
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
+        // ✅ pakai token dari session, bukan localStorage
+        const token = session?.access_token;
+
         if (!token) {
           enqueueSnackbar("You are not authenticated.", {
             variant: "error",
@@ -202,6 +201,14 @@ export default function OrganizerEventCreateViews() {
     }
   };
 
+  if (status === "loading") {
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-8">
+        <p className="text-muted text-sm">Loading session...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <h1 className="text-clear mb-6 text-2xl font-semibold tracking-tight">
@@ -221,7 +228,7 @@ export default function OrganizerEventCreateViews() {
             id="title"
             name="title"
             type="text"
-            className="border-lines bg-tertiary focus:border-accent1-primary focus:ring-accent2-hover shadow-primary w-full rounded-xl px-3 py-2 text-sm shadow-inner ring-0 outline-none focus:ring-2"
+            className="border-lines bg-tertiary focus:border-accent1-primary focus:ring-accent2-hover w-full rounded-xl border px-3 py-2 text-sm ring-0 outline-none focus:ring-2"
             value={values.title}
             onChange={handleChange}
             onBlur={handleBlur}
@@ -244,7 +251,7 @@ export default function OrganizerEventCreateViews() {
             id="description"
             name="description"
             rows={4}
-            className="border-lines bg-tertiary shadow-primary focus:border-accent1-primary focus:ring-accent2-hover w-full rounded-xl border px-3 py-2 text-sm shadow-inner ring-0 outline-none focus:ring-2"
+            className="border-lines bg-tertiary focus:border-accent1-primary focus:ring-accent2-hover w-full rounded-xl border px-3 py-2 text-sm ring-0 outline-none focus:ring-2"
             value={values.description}
             onChange={handleChange}
             onBlur={handleBlur}
@@ -267,7 +274,7 @@ export default function OrganizerEventCreateViews() {
             <select
               id="category"
               name="category"
-              className="border-lines bg-tertiary focus:border-accent1-primary focus:ring-accent2-hover w-full rounded-xl border px-3 py-2 text-sm shadow-sm ring-0 outline-none focus:ring-2"
+              className="border-lines bg-tertiary focus:border-accent1-primary focus:ring-accent2-hover w-full rounded-xl border px-3 py-2 text-sm ring-0 outline-none focus:ring-2"
               value={values.category}
               onChange={handleChange}
               onBlur={handleBlur}
@@ -297,7 +304,7 @@ export default function OrganizerEventCreateViews() {
               id="location"
               name="location"
               type="text"
-              className="border-lines bg-tertiary shadow-primary focus:border-accent1-primary focus:ring-accent2-hover w-full rounded-xl border px-3 py-2 text-sm shadow-inner ring-0 outline-none focus:ring-2"
+              className="border-lines bg-tertiary focus:border-accent1-primary focus:ring-accent2-hover w-full rounded-xl border px-3 py-2 text-sm ring-0 outline-none focus:ring-2"
               value={values.location}
               onChange={handleChange}
               onBlur={handleBlur}
@@ -322,11 +329,10 @@ export default function OrganizerEventCreateViews() {
               id="startDate"
               name="startDate"
               type="datetime-local"
-              className="border-lines bg-tertiary focus:border-accent1-primary focus:ring-accent2-hover w-full rounded-xl border px-3 py-2 text-sm shadow-sm ring-0 outline-none focus:ring-2"
+              className="border-lines bg-tertiary focus:border-accent1-primary focus:ring-accent2-hover w-full rounded-xl border px-3 py-2 text-sm ring-0 outline-none focus:ring-2"
               value={values.startDate}
               onChange={handleChange}
               onBlur={handleBlur}
-              step={1800}
             />
             {touched.startDate && errors.startDate && (
               <p className="text-xs text-red-500">{errors.startDate}</p>
@@ -341,7 +347,7 @@ export default function OrganizerEventCreateViews() {
               id="endDate"
               name="endDate"
               type="datetime-local"
-              className="border-lines bg-tertiary focus:border-accent1-primary focus:ring-accent2-hover w-full rounded-xl border px-3 py-2 text-sm shadow-sm ring-0 outline-none focus:ring-2"
+              className="border-lines bg-tertiary focus:border-accent1-primary focus:ring-accent2-hover w-full rounded-xl border px-3 py-2 text-sm ring-0 outline-none focus:ring-2"
               value={values.endDate}
               onChange={handleChange}
               onBlur={handleBlur}
@@ -363,7 +369,7 @@ export default function OrganizerEventCreateViews() {
               name="price"
               type="number"
               min={0}
-              className="border-lines shadow-primary bg-tertiary focus:border-accent1-primary focus:ring-accent2-hover w-full rounded-xl border px-3 py-2 text-sm shadow-inner ring-0 outline-none focus:ring-2"
+              className="border-lines bg-tertiary focus:border-accent1-primary focus:ring-accent2-hover w-full rounded-xl border px-3 py-2 text-sm ring-0 outline-none focus:ring-2"
               value={values.price}
               onChange={handleChange}
               onBlur={handleBlur}
@@ -386,7 +392,7 @@ export default function OrganizerEventCreateViews() {
               name="availableSeats"
               type="number"
               min={0}
-              className="border-lines bg-tertiary shadow-primary focus:border-accent1-primary focus:ring-accent2-hover w-full rounded-xl border px-3 py-2 text-sm shadow-inner ring-0 outline-none focus:ring-2"
+              className="border-lines bg-tertiary focus:border-accent1-primary focus:ring-accent2-hover w-full rounded-xl border px-3 py-2 text-sm ring-0 outline-none focus:ring-2"
               value={values.availableSeats}
               onChange={handleChange}
               onBlur={handleBlur}
@@ -407,7 +413,7 @@ export default function OrganizerEventCreateViews() {
             <select
               id="status"
               name="status"
-              className="border-lines bg-tertiary focus:border-accent1-primary focus:ring-accent2-hover w-full rounded-xl border px-3 py-2 text-sm shadow-sm ring-0 outline-none focus:ring-2"
+              className="border-lines bg-tertiary focus:border-accent1-primary focus:ring-accent2-hover w-full rounded-xl border px-3 py-2 text-sm ring-0 outline-none focus:ring-2"
               value={values.status}
               onChange={handleChange}
               onBlur={handleBlur}
@@ -453,7 +459,7 @@ export default function OrganizerEventCreateViews() {
         <div className="flex items-center justify-end gap-3 pt-2">
           <button
             type="button"
-            className="border-lines bg-tertiary hover:bg-primary rounded-xl border px-4 py-2 text-sm font-medium shadow-sm"
+            className="border-lines bg-tertiary hover:bg-primary rounded-xl border px-4 py-2 text-sm font-medium"
             onClick={() => router.push("/org/events")}
           >
             Cancel
@@ -461,7 +467,7 @@ export default function OrganizerEventCreateViews() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="from-accent1-primary to-accent2-primary text-accent-foreground hover:from-accent1-hover hover:text-clear hover:to-accent2-hover text-clear-invert rounded-xl bg-linear-to-r px-4 py-2 text-sm font-semibold shadow-sm shadow-orange-500 transition hover:bg-linear-to-r disabled:cursor-not-allowed disabled:opacity-60"
+            className="from-accent1-primary to-accent2-primary text-accent-foreground hover:from-accent1-hover hover:text-clear hover:to-accent2-hover text-clear-invert rounded-xl bg-linear-to-r px-4 py-2 text-sm font-semibold shadow-sm transition hover:bg-linear-to-r disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isSubmitting ? "Creating..." : "Create Event"}
           </button>
