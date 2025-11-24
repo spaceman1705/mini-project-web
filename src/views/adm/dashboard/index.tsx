@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   IoPeople,
@@ -14,10 +14,55 @@ import {
   IoStatsChart,
   IoTime
 } from "react-icons/io5";
+import {
+  getAdminStats,
+  getAdminRecentUsers,
+  getAdminPendingEvents,
+  getAdminUserGrowth
+} from "@/services/dashboard";
+
+interface AdminStats {
+  totalUsers: number;
+  activeEvents: number;
+  platformRevenue: number;
+  systemHealth: number;
+}
+
+interface RecentUser {
+  name: string;
+  email: string;
+  role: string;
+  status: string;
+  joined: string;
+}
+
+interface PendingEvent {
+  id: string;
+  title: string;
+  organizer: string;
+  status: string;
+  submitted: string;
+}
+
+interface UserGrowth {
+  month: string;
+  users: number;
+}
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
+
+  const [stats, setStats] = useState<AdminStats>({
+    totalUsers: 0,
+    activeEvents: 0,
+    platformRevenue: 0,
+    systemHealth: 0
+  });
+  const [recentUsers, setRecentUsers] = useState<RecentUser[]>([]);
+  const [pendingEvents, setPendingEvents] = useState<PendingEvent[]>([]);
+  const [userGrowth, setUserGrowth] = useState<UserGrowth[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -25,10 +70,60 @@ export default function AdminDashboard() {
     }
   }, [status, router]);
 
-  if (status === "loading") {
+  useEffect(() => {
+    async function fetchData() {
+      if (!session?.access_token) return;
+
+      try {
+        setLoading(true);
+
+        // Fetch stats
+        const statsResponse = await getAdminStats(session.access_token);
+        if (statsResponse?.data) {
+          setStats({
+            totalUsers: statsResponse.data.totalUsers || 0,
+            activeEvents: statsResponse.data.activeEvents || 0,
+            platformRevenue: statsResponse.data.platformRevenue || 0,
+            systemHealth: statsResponse.data.systemHealth || 0
+          });
+        }
+
+        // Fetch recent users
+        const usersResponse = await getAdminRecentUsers(session.access_token, 3);
+        if (usersResponse?.data && Array.isArray(usersResponse.data)) {
+          setRecentUsers(usersResponse.data);
+        }
+
+        // Fetch pending events
+        const eventsResponse = await getAdminPendingEvents(session.access_token);
+        if (eventsResponse?.data && Array.isArray(eventsResponse.data)) {
+          setPendingEvents(eventsResponse.data);
+        }
+
+        // Fetch user growth
+        const growthResponse = await getAdminUserGrowth(session.access_token);
+        if (growthResponse?.data && Array.isArray(growthResponse.data)) {
+          setUserGrowth(growthResponse.data);
+        }
+      } catch (error) {
+        console.error("Error fetching admin dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (session?.access_token) {
+      fetchData();
+    }
+  }, [session?.access_token]);
+
+  if (status === "loading" || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-secondary">
-        <div className="text-muted">Loading...</div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent1-primary mx-auto mb-4"></div>
+          <div className="text-muted">Loading dashboard...</div>
+        </div>
       </div>
     );
   }
@@ -37,38 +132,35 @@ export default function AdminDashboard() {
     return null;
   }
 
-  // Mock data
-  const stats = [
-    { label: "Total Users", value: "2,453", change: "+124", icon: IoPeople, color: "accent1" },
-    { label: "Active Events", value: "156", change: "+23", icon: IoCalendar, color: "accent2" },
-    { label: "Platform Revenue", value: "$45,280", change: "+$5,420", icon: IoTrendingUp, color: "green" },
-    { label: "System Health", value: "98%", change: "+2%", icon: IoShieldCheckmark, color: "blue" }
-  ];
-
-  const recentUsers = [
-    { name: "John Doe", email: "john@example.com", role: "Customer", status: "Active", joined: "2 hours ago" },
-    { name: "Jane Smith", email: "jane@example.com", role: "Organizer", status: "Active", joined: "5 hours ago" },
-    { name: "Bob Johnson", email: "bob@example.com", role: "Customer", status: "Pending", joined: "1 day ago" }
-  ];
-
-  const pendingEvents = [
-    { id: 1, title: "Tech Summit 2024", organizer: "TechCorp", status: "Pending", submitted: "1 hour ago" },
-    { id: 2, title: "Art Exhibition", organizer: "Gallery Inc", status: "Pending", submitted: "3 hours ago" }
-  ];
-
-  const systemAlerts = [
-    { type: "warning", message: "High server load detected", time: "10 min ago" },
-    { type: "info", message: "Database backup completed", time: "1 hour ago" },
-    { type: "success", message: "System update successful", time: "2 hours ago" }
-  ];
-
-  const userGrowth = [
-    { month: "Jan", users: 1200 },
-    { month: "Feb", users: 1450 },
-    { month: "Mar", users: 1680 },
-    { month: "Apr", users: 1890 },
-    { month: "May", users: 2120 },
-    { month: "Jun", users: 2453 }
+  const statsData = [
+    {
+      label: "Total Users",
+      value: stats.totalUsers.toString(),
+      change: stats.totalUsers > 0 ? `+${Math.floor(stats.totalUsers * 0.05)}` : "+0",
+      icon: IoPeople,
+      color: "accent1"
+    },
+    {
+      label: "Active Events",
+      value: stats.activeEvents.toString(),
+      change: stats.activeEvents > 0 ? `+${Math.floor(stats.activeEvents * 0.1)}` : "+0",
+      icon: IoCalendar,
+      color: "accent2"
+    },
+    {
+      label: "Platform Revenue",
+      value: `${stats.platformRevenue.toFixed(2)}`,
+      change: stats.platformRevenue > 0 ? `+${(stats.platformRevenue * 0.12).toFixed(0)}` : "+$0",
+      icon: IoTrendingUp,
+      color: "green"
+    },
+    {
+      label: "System Health",
+      value: `${stats.systemHealth}%`,
+      change: "+2%",
+      icon: IoShieldCheckmark,
+      color: "blue"
+    }
   ];
 
   const maxUsers = Math.max(...userGrowth.map(d => d.users));
@@ -88,7 +180,7 @@ export default function AdminDashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => (
+          {statsData.map((stat, index) => (
             <div key={index} className="bg-tertiary rounded-2xl shadow-xl p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className={`bg-${stat.color}-500/10 p-3 rounded-xl`}>
@@ -136,33 +228,37 @@ export default function AdminDashboard() {
               </div>
 
               <div className="space-y-3">
-                {recentUsers.map((user, index) => (
-                  <div key={index} className="bg-secondary rounded-xl p-4 flex items-center justify-between hover:bg-secondary/80 transition">
-                    <div className="flex items-center gap-4">
-                      <div className="bg-linear-to-r/oklch from-accent1-primary to-accent2-primary p-3 rounded-full">
-                        <IoPeople className="h-5 w-5 text-white" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-clear">{user.name}</p>
-                        <p className="text-xs text-muted">{user.email}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs bg-accent1-primary/10 text-accent1-primary px-2 py-0.5 rounded-full font-semibold">
-                            {user.role}
-                          </span>
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${user.status === 'Active'
-                              ? 'bg-green-500/10 text-green-500'
-                              : 'bg-yellow-500/10 text-yellow-500'
-                            }`}>
-                            {user.status}
-                          </span>
+                {recentUsers.length > 0 ? (
+                  recentUsers.map((user, index) => (
+                    <div key={index} className="bg-secondary rounded-xl p-4 flex items-center justify-between hover:bg-secondary/80 transition">
+                      <div className="flex items-center gap-4">
+                        <div className="bg-linear-to-r/oklch from-accent1-primary to-accent2-primary p-3 rounded-full">
+                          <IoPeople className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-clear">{user.name}</p>
+                          <p className="text-xs text-muted">{user.email}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs bg-accent1-primary/10 text-accent1-primary px-2 py-0.5 rounded-full font-semibold">
+                              {user.role}
+                            </span>
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${user.status === 'Active'
+                                ? 'bg-green-500/10 text-green-500'
+                                : 'bg-yellow-500/10 text-yellow-500'
+                              }`}>
+                              {user.status}
+                            </span>
+                          </div>
                         </div>
                       </div>
+                      <div className="text-right">
+                        <p className="text-xs text-muted/60">{user.joined}</p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs text-muted/60">{user.joined}</p>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-sm text-muted text-center py-4">No recent users</p>
+                )}
               </div>
             </div>
 
@@ -179,31 +275,35 @@ export default function AdminDashboard() {
               </div>
 
               <div className="space-y-3">
-                {pendingEvents.map((event) => (
-                  <div key={event.id} className="bg-secondary rounded-xl p-4 hover:bg-secondary/80 transition">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="text-sm font-bold text-clear mb-1">{event.title}</h3>
-                        <p className="text-xs text-muted">by {event.organizer}</p>
-                        <div className="flex items-center gap-2 text-xs text-muted/60 mt-1">
-                          <IoTime className="h-3 w-3" />
-                          {event.submitted}
+                {pendingEvents.length > 0 ? (
+                  pendingEvents.map((event) => (
+                    <div key={event.id} className="bg-secondary rounded-xl p-4 hover:bg-secondary/80 transition">
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <h3 className="text-sm font-bold text-clear mb-1">{event.title}</h3>
+                          <p className="text-xs text-muted">by {event.organizer}</p>
+                          <div className="flex items-center gap-2 text-xs text-muted/60 mt-1">
+                            <IoTime className="h-3 w-3" />
+                            {event.submitted}
+                          </div>
                         </div>
+                        <span className="text-xs bg-yellow-500/10 text-yellow-500 px-2 py-1 rounded-full font-semibold">
+                          {event.status}
+                        </span>
                       </div>
-                      <span className="text-xs bg-yellow-500/10 text-yellow-500 px-2 py-1 rounded-full font-semibold">
-                        {event.status}
-                      </span>
+                      <div className="flex gap-2">
+                        <button className="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-lg transition text-xs">
+                          Approve
+                        </button>
+                        <button className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 rounded-lg transition text-xs">
+                          Reject
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <button className="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-lg transition text-xs">
-                        Approve
-                      </button>
-                      <button className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 rounded-lg transition text-xs">
-                        Reject
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-sm text-muted text-center py-4">No pending events</p>
+                )}
               </div>
             </div>
           </div>
@@ -211,7 +311,7 @@ export default function AdminDashboard() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* System Alerts */}
-            <div className="bg-tertiary rounded-2xl shadow-xl p-6">
+            {/* <div className="bg-tertiary rounded-2xl shadow-xl p-6">
               <h3 className="text-lg font-bold text-clear mb-4">System Alerts</h3>
               <div className="space-y-3">
                 {systemAlerts.map((alert, index) => (
@@ -228,7 +328,7 @@ export default function AdminDashboard() {
                   </div>
                 ))}
               </div>
-            </div>
+            </div> */}
 
             {/* Quick Actions */}
             <div className="bg-tertiary rounded-2xl shadow-xl p-6">
