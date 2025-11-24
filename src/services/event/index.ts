@@ -32,12 +32,7 @@ export async function getEvents(params: GetEventsParams = {}) {
   }
 }
 
-console.log("[DEBUG] BASE URL =", baseUrl);
-
 export async function getEventDetail(slug: string) {
-  const url = `${baseUrl}/events/${slug}`;
-  console.log("[DEBUG] FETCH URL =", url);
-
   try {
     const { data } = await axios.get<EventDetailResponse>(
       `${baseUrl}/events/${slug}`,
@@ -88,7 +83,7 @@ export async function createEventApi(
     }
 
     if (payload.image) {
-      formData.append("image", payload.image);
+      formData.append("bannerImg", payload.image);
     }
 
     const { data } = await axios.post<ApiResponse>(
