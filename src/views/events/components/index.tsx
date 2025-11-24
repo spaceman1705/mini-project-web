@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import type {
-  EventCategory,
   EventListItem,
   EventListResponse,
   EventTag,
@@ -14,6 +14,7 @@ import FiltersBar from "./filters";
 import EventsGrid from "./eventGrid";
 
 import { getEvents } from "@/services/event";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 
 export type TimeFilter =
   | "all"
@@ -30,7 +31,7 @@ export type UiEventItem = {
   id: string;
   slug: string;
   title: string;
-  category: EventCategory;
+  category: string;
   location: string;
   date: string;
   price: number | null;
@@ -48,6 +49,7 @@ export type EventsViewInitialData = {
 
 export type EventsViewClientProps = {
   initialData: EventsViewInitialData | null;
+  initialCategories: string[];
 };
 
 type EventWithMeta = EventListItem & {
@@ -56,8 +58,8 @@ type EventWithMeta = EventListItem & {
 };
 
 function mapToUiEvent(item: EventListItem): UiEventItem {
-  const category = (item.category as EventCategory) ?? "Music";
   const withMeta = item as EventWithMeta;
+  const category = item.category || "Other";
 
   const tags: Tag[] = [];
   if (withMeta.location.toLowerCase() === "online") tags.push("Online");
@@ -81,20 +83,14 @@ function mapToUiEvent(item: EventListItem): UiEventItem {
   };
 }
 
-function useDebouncedValue<T>(value: T, delay = 300): T {
-  const [debounced, setDebounced] = useState(value);
-
-  useEffect(() => {
-    const t = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(t);
-  }, [value, delay]);
-
-  return debounced;
-}
-
 export default function EventsViewClient({
   initialData,
+  initialCategories,
 }: EventsViewClientProps) {
+  const searchParams = useSearchParams();
+
+  const initialQ = searchParams.get("q") ?? "";
+
   const [events, setEvents] = useState<UiEventItem[]>(() =>
     (initialData?.items ?? []).map(mapToUiEvent),
   );
@@ -103,10 +99,10 @@ export default function EventsViewClient({
   const [total, setTotal] = useState(initialData?.total ?? 0);
   const [totalPages, setTotalPages] = useState(initialData?.totalPages ?? 1);
 
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(initialQ);
   const debouncedQ = useDebouncedValue(q);
 
-  const [category, setCategory] = useState<EventCategory | "All">("All");
+  const [category, setCategory] = useState<string | "All">("All");
   const [location, setLocation] = useState<string | "All">("All");
   const [time, setTime] = useState<TimeFilter>("upcoming");
   const [freeOnly, setFreeOnly] = useState(false);
@@ -257,6 +253,7 @@ export default function EventsViewClient({
           setCategory(cat);
           setPage(1);
         }}
+        categories={initialCategories}
         locations={locations}
         location={location}
         onLocationChange={(loc) => {

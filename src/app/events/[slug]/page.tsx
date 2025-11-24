@@ -1,9 +1,12 @@
 import EventDetailView from "@/views/eventDetail";
 
 type EventDetailPageProps = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
-export default function EventDetailPage({ params }: EventDetailPageProps) {
-  return <EventDetailView slug={params.slug} />;
+export default async function EventDetailPage({
+  params,
+}: EventDetailPageProps) {
+  const { slug } = await params;
+  return <EventDetailView slug={slug} />;
 }
