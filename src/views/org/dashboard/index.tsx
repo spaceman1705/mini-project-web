@@ -2,22 +2,73 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useSnackbar } from "notistack";
 import {
-  IoCalendar,
-  IoPeople,
+  IoCalendarOutline,
+  IoTicketOutline,
   IoTrendingUp,
-  IoTicket,
-  IoAdd,
-  IoEye,
-  IoStatsChart,
-  IoTime
+  IoCashOutline,
+  IoAddCircle,
+  IoEyeOutline,
+  IoTimeOutline,
+  IoCheckmarkCircle,
+  IoCloseCircle,
+  IoEllipsisVertical,
+  IoCreate,
+  IoTrash,
+  IoAnalytics,
+  IoPeople
 } from "react-icons/io5";
+import {
+  getOrganizerStats,
+  getOrganizerEvents,
+  getOrganizerWeeklySales,
+  deleteOrganizerEvent
+} from "@/services/dashboard";
+
+interface Stats {
+  activeEvents: number;
+  totalAttendees: number;
+  totalRevenue: number;
+  ticketsSold: number;
+}
+
+interface Event {
+  id: string;
+  title: string;
+  startDate: string;
+  endDate: string;
+  location: string;
+  price: number;
+  availableSeats: number;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  image?: string;
+  _count?: {
+    transaction: number;
+  };
+}
+
+interface WeeklySale {
+  day: string;
+  sales: number;
+}
 
 export default function OrganizerDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
+
+  const [stats, setStats] = useState<Stats>({
+    activeEvents: 0,
+    totalAttendees: 0,
+    totalRevenue: 0,
+    ticketsSold: 0
+  });
+  const [events, setEvents] = useState<Event[]>([]);
+  const [weeklySales, setWeeklySales] = useState<WeeklySale[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -25,10 +76,77 @@ export default function OrganizerDashboard() {
     }
   }, [status, router]);
 
-  if (status === "loading") {
+  useEffect(() => {
+    async function fetchDashboardData() {
+      if (!session?.access_token) return;
+
+      try {
+        setLoading(true);
+
+        // Fetch data dari API
+        const [statsResponse, eventsResponse, salesResponse] = await Promise.all([
+          getOrganizerStats(session.access_token),
+          getOrganizerEvents(session.access_token),
+          getOrganizerWeeklySales(session.access_token)
+        ]);
+
+        console.log("Stats:", statsResponse);
+        console.log("Events:", eventsResponse);
+        console.log("Weekly Sales:", salesResponse);
+
+        setStats(statsResponse.data);
+        setEvents(eventsResponse.data);
+        setWeeklySales(salesResponse.data);
+
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+        enqueueSnackbar("Failed to load dashboard data", { variant: "error" });
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (session?.access_token) {
+      fetchDashboardData();
+    }
+  }, [session?.access_token, enqueueSnackbar]);
+
+  const getStatusBadge = (status: string) => {
+    const badges = {
+      PENDING: "bg-yellow-500/10 text-yellow-500",
+      APPROVED: "bg-green-500/10 text-green-500",
+      REJECTED: "bg-red-500/10 text-red-500"
+    };
+    return badges[status as keyof typeof badges] || badges.PENDING;
+  };
+
+  const getStatusIcon = (status: string) => {
+    if (status === "APPROVED") return <IoCheckmarkCircle className="h-4 w-4" />;
+    if (status === "REJECTED") return <IoCloseCircle className="h-4 w-4" />;
+    return <IoTimeOutline className="h-4 w-4" />;
+  };
+
+  const handleDeleteEvent = async (eventId: string, eventTitle: string) => {
+    if (!confirm(`Are you sure you want to delete "${eventTitle}"?`)) return;
+    if (!session?.access_token) return;
+
+    try {
+      await deleteOrganizerEvent(session.access_token, eventId);
+
+      setEvents(prev => prev.filter(e => e.id !== eventId));
+      enqueueSnackbar("Event deleted successfully", { variant: "success" });
+    } catch (error) {
+      enqueueSnackbar("Failed to delete event", { variant: "error" });
+    }
+  };
+
+  if (status === "loading" || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-secondary">
-        <div className="text-muted">Loading...</div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent1-primary mx-auto mb-4"></div>
+          <div className="text-muted">Loading dashboard...</div>
+        </div>
       </div>
     );
   }
@@ -37,245 +155,233 @@ export default function OrganizerDashboard() {
     return null;
   }
 
-  // Mock data
-  const stats = [
-    { label: "Active Events", value: "5", change: "+2", icon: IoCalendar, color: "accent1" },
-    { label: "Total Attendees", value: "1,234", change: "+156", icon: IoPeople, color: "accent2" },
-    { label: "Revenue", value: "$12,450", change: "+$2,340", icon: IoTrendingUp, color: "green" },
-    { label: "Tickets Sold", value: "856", change: "+89", icon: IoTicket, color: "blue" }
-  ];
-
-  const recentEvents = [
-    {
-      id: 1,
-      title: "Tech Conference 2024",
-      status: "Active",
-      attendees: 234,
-      revenue: "$5,600",
-      date: "2024-12-25",
-      ticketsSold: 234,
-      totalTickets: 500
-    },
-    {
-      id: 2,
-      title: "Music Festival",
-      status: "Active",
-      attendees: 456,
-      revenue: "$8,900",
-      date: "2024-12-30",
-      ticketsSold: 456,
-      totalTickets: 1000
-    }
-  ];
-
-  const upcomingSales = [
-    { day: "Mon", sales: 45 },
-    { day: "Tue", sales: 67 },
-    { day: "Wed", sales: 89 },
-    { day: "Thu", sales: 56 },
-    { day: "Fri", sales: 123 },
-    { day: "Sat", sales: 145 },
-    { day: "Sun", sales: 98 }
-  ];
-
-  const maxSales = Math.max(...upcomingSales.map(d => d.sales));
+  // Calculate additional stats
+  const upcomingEvents = events.filter(e => new Date(e.startDate) > new Date()).length;
+  const pendingApproval = events.filter(e => e.status === "PENDING").length;
 
   return (
     <div className="min-h-screen bg-secondary py-8 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-clear mb-2">
-              Organizer <span className="text-transparent bg-clip-text bg-linear-to-r/oklch from-accent1-primary to-accent2-primary">
-                Dashboard
-              </span>
+            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-linear-to-r/oklch from-accent1-primary to-accent2-primary mb-2">
+              Organizer Dashboard
             </h1>
-            <p className="text-muted">Monitor your events and track performance</p>
+            <p className="text-muted">Welcome back, {session.user.firstname}!</p>
           </div>
-          <Link
-            href="/org/events/create"
-            className="flex items-center gap-2 bg-linear-to-r/oklch from-accent1-primary to-accent2-primary text-white font-semibold px-6 py-3 rounded-lg hover:opacity-90 transition"
+          <button
+            onClick={() => router.push("/organizer/events/create")}
+            className="flex items-center gap-2 bg-linear-to-r/oklch from-accent1-primary to-accent2-primary text-white font-semibold px-6 py-3 rounded-xl hover:opacity-90 transition shadow-lg"
           >
-            <IoAdd className="h-5 w-5" />
+            <IoAddCircle className="h-5 w-5" />
             Create Event
-          </Link>
+          </button>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => (
-            <div key={index} className="bg-tertiary rounded-2xl shadow-xl p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className={`bg-${stat.color}-500/10 p-3 rounded-xl`}>
-                  <stat.icon className={`h-6 w-6 text-${stat.color}-500`} />
-                </div>
-                <span className="text-xs bg-green-500/10 text-green-500 px-2 py-1 rounded-full font-semibold">
-                  {stat.change}
-                </span>
-              </div>
-              <p className="text-muted text-sm mb-1">{stat.label}</p>
-              <p className="text-3xl font-bold text-clear">{stat.value}</p>
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+          <div className="bg-tertiary rounded-2xl shadow-xl p-6 border-l-4 border-accent1-primary">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-muted text-sm">Active Events</p>
+              <IoCalendarOutline className="h-8 w-8 text-accent1-primary opacity-20" />
             </div>
-          ))}
+            <p className="text-3xl font-bold text-clear">{stats.activeEvents}</p>
+          </div>
+
+          <div className="bg-tertiary rounded-2xl shadow-xl p-6 border-l-4 border-blue-500">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-muted text-sm">Upcoming</p>
+              <IoTimeOutline className="h-8 w-8 text-blue-500 opacity-20" />
+            </div>
+            <p className="text-3xl font-bold text-clear">{upcomingEvents}</p>
+          </div>
+
+          <div className="bg-tertiary rounded-2xl shadow-xl p-6 border-l-4 border-green-500">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-muted text-sm">Tickets Sold</p>
+              <IoTicketOutline className="h-8 w-8 text-green-500 opacity-20" />
+            </div>
+            <p className="text-3xl font-bold text-clear">{stats.ticketsSold}</p>
+          </div>
+
+          <div className="bg-tertiary rounded-2xl shadow-xl p-6 border-l-4 border-purple-500">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-muted text-sm">Total Revenue</p>
+              <IoCashOutline className="h-8 w-8 text-purple-500 opacity-20" />
+            </div>
+            <p className="text-2xl font-bold text-clear">
+              Rp {(stats.totalRevenue / 1000000).toFixed(1)}M
+            </p>
+          </div>
+
+          <div className="bg-tertiary rounded-2xl shadow-xl p-6 border-l-4 border-yellow-500">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-muted text-sm">Pending</p>
+              <IoTimeOutline className="h-8 w-8 text-yellow-500 opacity-20" />
+            </div>
+            <p className="text-3xl font-bold text-clear">{pendingApproval}</p>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Recent Events */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Events Table */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Events List */}
+          <div className="lg:col-span-2">
             <div className="bg-tertiary rounded-2xl shadow-xl p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-clear">Your Events</h2>
-                <Link
-                  href="/org/events"
-                  className="text-accent1-primary hover:text-accent1-hover text-sm font-semibold"
+                <h2 className="text-2xl font-bold text-clear">My Events</h2>
+                <button
+                  onClick={() => router.push("/organizer/events")}
+                  className="text-accent1-primary hover:underline text-sm font-semibold"
                 >
                   View All
-                </Link>
+                </button>
               </div>
 
               <div className="space-y-4">
-                {recentEvents.map((event) => (
-                  <div key={event.id} className="bg-secondary rounded-xl p-4 hover:bg-secondary/80 transition">
-                    <div className="flex items-start justify-between mb-3">
+                {events.slice(0, 5).map((event) => (
+                  <div
+                    key={event.id}
+                    className="bg-secondary rounded-xl p-4 hover:bg-secondary/80 transition group"
+                  >
+                    <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="text-lg font-bold text-clear">{event.title}</h3>
-                          <span className="text-xs bg-green-500/10 text-green-500 px-2 py-1 rounded-full font-semibold">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="font-bold text-clear group-hover:text-accent1-primary transition">
+                            {event.title}
+                          </h3>
+                          <span className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full font-semibold ${getStatusBadge(event.status)}`}>
+                            {getStatusIcon(event.status)}
                             {event.status}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-muted">
-                          <IoTime className="h-4 w-4" />
-                          {new Date(event.date).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
+
+                        <div className="space-y-1 text-sm text-muted mb-3">
+                          <p className="flex items-center gap-2">
+                            <IoCalendarOutline className="h-4 w-4" />
+                            {new Date(event.startDate).toLocaleDateString('id-ID', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric'
+                            })}
+                          </p>
+                          <p className="flex items-center gap-2">
+                            <IoTicketOutline className="h-4 w-4" />
+                            {event.availableSeats} seats • Rp {event.price.toLocaleString('id-ID')}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-4 text-xs">
+                          <div className="flex items-center gap-1 text-green-500">
+                            <IoTrendingUp className="h-4 w-4" />
+                            <span className="font-semibold">{event._count?.transaction || 0} sold</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="grid grid-cols-3 gap-4 mb-4">
-                      <div>
-                        <p className="text-xs text-muted mb-1">Attendees</p>
-                        <p className="text-lg font-bold text-clear">{event.attendees}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted mb-1">Revenue</p>
-                        <p className="text-lg font-bold text-green-500">{event.revenue}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted mb-1">Tickets</p>
-                        <p className="text-lg font-bold text-clear">{event.ticketsSold}/{event.totalTickets}</p>
-                      </div>
-                    </div>
+                      <div className="relative">
+                        <button
+                          onClick={() => setActiveMenu(activeMenu === event.id ? null : event.id)}
+                          className="p-2 hover:bg-tertiary rounded-lg transition text-muted"
+                        >
+                          <IoEllipsisVertical className="h-5 w-5" />
+                        </button>
 
-                    {/* Progress Bar */}
-                    <div className="mb-4">
-                      <div className="h-2 bg-tertiary rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-linear-to-r/oklch from-accent1-primary to-accent2-primary"
-                          style={{ width: `${(event.ticketsSold / event.totalTickets) * 100}%` }}
-                        ></div>
+                        {activeMenu === event.id && (
+                          <div className="absolute right-0 mt-2 w-48 bg-tertiary rounded-lg shadow-xl border border-secondary z-10">
+                            <button
+                              onClick={() => {
+                                router.push(`/organizer/events/${event.id}`);
+                                setActiveMenu(null);
+                              }}
+                              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary transition text-clear text-sm"
+                            >
+                              <IoEyeOutline className="h-5 w-5" />
+                              View Details
+                            </button>
+                            <button
+                              onClick={() => {
+                                router.push(`/organizer/events/${event.id}/edit`);
+                                setActiveMenu(null);
+                              }}
+                              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary transition text-clear text-sm"
+                            >
+                              <IoCreate className="h-5 w-5" />
+                              Edit Event
+                            </button>
+                            <button
+                              onClick={() => {
+                                router.push(`/organizer/events/${event.id}/analytics`);
+                                setActiveMenu(null);
+                              }}
+                              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary transition text-clear text-sm"
+                            >
+                              <IoAnalytics className="h-5 w-5" />
+                              Analytics
+                            </button>
+                            <button
+                              onClick={() => {
+                                handleDeleteEvent(event.id, event.title);
+                                setActiveMenu(null);
+                              }}
+                              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary transition text-red-500 text-sm border-t border-secondary"
+                            >
+                              <IoTrash className="h-5 w-5" />
+                              Delete Event
+                            </button>
+                          </div>
+                        )}
                       </div>
-                      <p className="text-xs text-muted mt-1">
-                        {Math.round((event.ticketsSold / event.totalTickets) * 100)}% tickets sold
-                      </p>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <button className="flex-1 bg-tertiary hover:bg-tertiary/80 text-clear font-semibold py-2 rounded-lg transition text-sm flex items-center justify-center gap-2">
-                        <IoEye className="h-4 w-4" />
-                        View Details
-                      </button>
-                      <button className="flex-1 bg-tertiary hover:bg-tertiary/80 text-clear font-semibold py-2 rounded-lg transition text-sm flex items-center justify-center gap-2">
-                        <IoStatsChart className="h-4 w-4" />
-                        Analytics
-                      </button>
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
 
-            {/* Sales Chart */}
-            <div className="bg-tertiary rounded-2xl shadow-xl p-6">
-              <h2 className="text-xl font-bold text-clear mb-6">Weekly Ticket Sales</h2>
-              <div className="flex items-end justify-between gap-2 h-48">
-                {upcomingSales.map((data, index) => (
-                  <div key={index} className="flex-1 flex flex-col items-center gap-2">
-                    <div className="w-full bg-secondary rounded-t-lg relative" style={{ height: `${(data.sales / maxSales) * 100}%` }}>
-                      <div className="absolute inset-0 bg-linear-to-t/oklch from-accent1-primary to-accent2-primary rounded-t-lg"></div>
-                    </div>
-                    <p className="text-xs text-muted font-semibold">{data.day}</p>
-                  </div>
-                ))}
-              </div>
+              {events.length === 0 && (
+                <div className="text-center py-12">
+                  <IoCalendarOutline className="h-16 w-16 text-muted/30 mx-auto mb-4" />
+                  <p className="text-muted mb-4">You haven&apos;t created any events yet</p>
+                  <button
+                    onClick={() => router.push("/organizer/events/create")}
+                    className="text-accent1-primary hover:underline font-semibold"
+                  >
+                    Create your first event
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Quick Stats */}
+          {/* Weekly Sales Chart */}
+          <div className="lg:col-span-1">
             <div className="bg-tertiary rounded-2xl shadow-xl p-6">
-              <h3 className="text-lg font-bold text-clear mb-4">Quick Stats</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted">Avg. Ticket Price</span>
-                  <span className="text-lg font-bold text-clear">$14.50</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted">Conversion Rate</span>
-                  <span className="text-lg font-bold text-green-500">67%</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted">Total Events</span>
-                  <span className="text-lg font-bold text-clear">12</span>
-                </div>
-              </div>
-            </div>
+              <h2 className="text-2xl font-bold text-clear mb-6">Weekly Sales</h2>
 
-            {/* Top Performing */}
-            <div className="bg-tertiary rounded-2xl shadow-xl p-6">
-              <h3 className="text-lg font-bold text-clear mb-4">Top Performing</h3>
               <div className="space-y-3">
-                <div className="flex items-center gap-3 bg-secondary p-3 rounded-lg">
-                  <div className="bg-accent1-primary text-white w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm">
-                    1
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-clear">Music Festival</p>
-                    <p className="text-xs text-muted">456 tickets</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 bg-secondary p-3 rounded-lg">
-                  <div className="bg-accent2-primary text-white w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm">
-                    2
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-clear">Tech Conference</p>
-                    <p className="text-xs text-muted">234 tickets</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Recent Reviews */}
-            <div className="bg-tertiary rounded-2xl shadow-xl p-6">
-              <h3 className="text-lg font-bold text-clear mb-4">Recent Reviews</h3>
-              <div className="space-y-4">
-                <div className="bg-secondary p-4 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="flex text-yellow-500">
-                      ★★★★★
+                {weeklySales.map((sale, index) => (
+                  <div key={index} className="flex items-center justify-between">
+                    <span className="text-sm text-muted font-medium w-12">{sale.day}</span>
+                    <div className="flex-1 mx-4">
+                      <div className="w-full bg-secondary rounded-full h-2">
+                        <div
+                          className="bg-gradient-to-r from-accent1-primary to-accent2-primary h-2 rounded-full transition-all duration-500"
+                          style={{
+                            width: `${Math.min(100, (sale.sales / Math.max(...weeklySales.map(s => s.sales))) * 100)}%`
+                          }}
+                        ></div>
+                      </div>
                     </div>
+                    <span className="text-sm font-bold text-clear w-8 text-right">{sale.sales}</span>
                   </div>
-                  <p className="text-xs text-muted">"Amazing event! Well organized."</p>
-                  <p className="text-xs text-muted/60 mt-1">- John Doe</p>
-                </div>
+                ))}
               </div>
+
+              {weeklySales.every(s => s.sales === 0) && (
+                <div className="text-center py-8">
+                  <IoTrendingUp className="h-12 w-12 text-muted/30 mx-auto mb-3" />
+                  <p className="text-muted text-sm">No sales data yet</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

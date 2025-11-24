@@ -55,7 +55,7 @@ function isAxiosError(
 }
 
 export default function OrganizerEventCreateViews() {
-  const { data: session, status } = useSession(); // ✅ ambil session NextAuth
+  const { data: session, status } = useSession();
   const [categories, setCategories] = useState<string[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -125,7 +125,6 @@ export default function OrganizerEventCreateViews() {
     validateOnChange: false,
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
-        // ✅ pakai token dari session, bukan localStorage
         const token = session?.access_token;
 
         if (!token) {
