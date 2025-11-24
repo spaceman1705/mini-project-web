@@ -1,5 +1,3 @@
-// src/services/event/index.ts
-
 import axios from "axios";
 import type { ApiResponse } from "@/types/api";
 import type {
@@ -85,7 +83,7 @@ export async function createEventApi(
     }
 
     if (payload.image) {
-      formData.append("image", payload.image);
+      formData.append("bannerImg", payload.image);
     }
 
     const { data } = await axios.post<ApiResponse>(

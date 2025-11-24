@@ -13,8 +13,18 @@ async function fetchEventDetail(slug: string): Promise<EventDetail | null> {
     const res = await getEventDetail(slug);
     return res.data;
   } catch (err) {
-    console.error("[EventDetail] Error saat fetch event detail:", err);
-    return null;
+    console.error("[EventDetail] Error while fetching event detail:", err);
+
+    if (
+      typeof err === "object" &&
+      err !== null &&
+      "response" in err &&
+      (err as { response?: { status?: number } }).response?.status === 404
+    ) {
+      return null;
+    }
+
+    throw err;
   }
 }
 
