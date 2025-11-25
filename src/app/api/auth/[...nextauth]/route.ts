@@ -164,7 +164,7 @@ const handler = NextAuth({
             role: "",
             refferalCode: "",
           },
-          access_token: "", // Ganti dari accessToken
+          access_token: "", // Ganti dari accessToken access_token
           error: token.error,
         };
       }
