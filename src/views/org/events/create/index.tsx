@@ -125,7 +125,6 @@ export default function OrganizerEventCreateViews() {
     validateOnChange: false,
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
-        
         const token = session?.access_token;
 
         if (!token) {
