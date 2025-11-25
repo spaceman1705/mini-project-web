@@ -39,7 +39,14 @@ interface RecentUser {
 interface PendingEvent {
   id: string;
   title: string;
-  organizer: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  organizer: {
+    firstname: string;
+    lastname: string;
+    email: string;
+  };
   status: string;
   submitted: string;
 }
@@ -162,6 +169,7 @@ export default function AdminDashboard() {
       color: "blue"
     }
   ];
+  console.log("pending event api result: ", pendingEvents);
 
   const maxUsers = Math.max(...userGrowth.map(d => d.users));
 
@@ -243,8 +251,8 @@ export default function AdminDashboard() {
                               {user.role}
                             </span>
                             <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${user.status === 'Active'
-                                ? 'bg-green-500/10 text-green-500'
-                                : 'bg-yellow-500/10 text-yellow-500'
+                              ? 'bg-green-500/10 text-green-500'
+                              : 'bg-yellow-500/10 text-yellow-500'
                               }`}>
                               {user.status}
                             </span>
@@ -281,16 +289,20 @@ export default function AdminDashboard() {
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <h3 className="text-sm font-bold text-clear mb-1">{event.title}</h3>
-                          <p className="text-xs text-muted">by {event.organizer}</p>
+                          <p className="text-xs text-muted">
+                            by {event.organizer.firstname} {event.organizer.lastname} {event.organizer.email}</p>
                           <div className="flex items-center gap-2 text-xs text-muted/60 mt-1">
                             <IoTime className="h-3 w-3" />
-                            {event.submitted}
+                            {new Date(event.startDate).toLocaleDateString()} — {new Date(event.endDate).toLocaleDateString()}
                           </div>
                         </div>
                         <span className="text-xs bg-yellow-500/10 text-yellow-500 px-2 py-1 rounded-full font-semibold">
                           {event.status}
                         </span>
                       </div>
+                      <p className="text-xs text-muted mb-3 line-clamp-2">
+                        {event.description}
+                      </p>
                       <div className="flex gap-2">
                         <button className="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-lg transition text-xs">
                           Approve

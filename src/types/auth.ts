@@ -3,6 +3,7 @@ export interface DecodedToken {
   firstname: string;
   lastname: string;
   role: string;
+  refferalCode?: string;
   exp: number;
   iat: number;
 }
@@ -16,6 +17,7 @@ declare module "next-auth" {
       firstname: string;
       lastname: string;
       role: string;
+      refferalCode?: string;
     };
     access_token: string; // Ganti dari accessToken untuk hindari konflik
     error?: string;
@@ -27,6 +29,7 @@ declare module "next-auth" {
     firstname: string;
     lastname: string;
     role: string;
+    refferalCode?: string;
     accessToken: string;
     refreshToken: string;
   }
@@ -38,6 +41,7 @@ declare module "next-auth/jwt" {
     firstname?: string;
     lastname?: string;
     role?: string;
+    refferalCode?: string;
     accessToken?: string;
     refreshToken?: string;
     error?: string;

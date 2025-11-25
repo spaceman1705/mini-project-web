@@ -9,6 +9,7 @@ import { jwtDecode } from "jwt-decode";
 
 import { DecodedToken } from "@/types/auth";
 import { loginService, refreshTokenService } from "@/services/auth";
+import { decode } from "punycode";
 
 // Custom session interface
 interface CustomSession extends DefaultSession {
@@ -18,6 +19,7 @@ interface CustomSession extends DefaultSession {
     firstname: string;
     lastname: string;
     role: string;
+    refferalCode: string;
   };
   access_token: string; // Ganti dari accessToken
   error?: string;
@@ -43,6 +45,7 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
       firstname: decoded.firstname,
       lastname: decoded.lastname,
       role: decoded.role,
+      refferalCode: decoded.refferalCode || "",
       accessToken,
       refreshToken,
       error: undefined,
@@ -101,6 +104,7 @@ const handler = NextAuth({
             firstname: decoded.firstname,
             lastname: decoded.lastname,
             role: decoded.role,
+            refferalCode: decoded.refferalCode || "",
             accessToken,
             refreshToken,
           };
@@ -124,6 +128,7 @@ const handler = NextAuth({
           firstname: user.firstname,
           lastname: user.lastname,
           role: user.role,
+          refferalCode: user.refferalCode || "",
           accessToken: user.accessToken,
           refreshToken: user.refreshToken,
           error: undefined,
@@ -157,6 +162,7 @@ const handler = NextAuth({
             firstname: "",
             lastname: "",
             role: "",
+            refferalCode: "",
           },
           access_token: "", // Ganti dari accessToken
           error: token.error,
@@ -171,6 +177,7 @@ const handler = NextAuth({
           firstname: token.firstname ?? "",
           lastname: token.lastname ?? "",
           role: token.role ?? "",
+          refferalCode: token.refferalCode ?? "",
         },
         access_token: token.accessToken ?? "", // Ganti dari accessToken
         error: token.error ?? undefined,

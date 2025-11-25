@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -54,10 +55,9 @@ function isAxiosError(
 }
 
 export default function OrganizerEventCreateViews() {
+  const { data: session, status } = useSession();
   const [categories, setCategories] = useState<string[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
-
-  const [token, setToken] = useState<string | null>(null);
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -65,13 +65,19 @@ export default function OrganizerEventCreateViews() {
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    const storedToken =
-      typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
-    if (storedToken) {
-      setToken(storedToken);
+    if (status === "unauthenticated") {
+      enqueueSnackbar("Please login first", { variant: "error" });
+      router.push("/auth/login");
     }
-  }, []);
+  }, [status, router, enqueueSnackbar]);
+
+  // ✅ Cek role organizer
+  useEffect(() => {
+    if (session?.user && session.user.role !== "ORGANIZER") {
+      enqueueSnackbar("Only organizers can create events", { variant: "error" });
+      router.push("/");
+    }
+  }, [session, router, enqueueSnackbar]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -129,7 +135,7 @@ export default function OrganizerEventCreateViews() {
     validateOnChange: false,
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
-        if (!token) {
+        if (!session?.access_token) {
           enqueueSnackbar("You are not authenticated.", {
             variant: "error",
           });
@@ -152,7 +158,7 @@ export default function OrganizerEventCreateViews() {
           image: values.image,
         };
 
-        await createEventApi(token, payload);
+        await createEventApi(session.access_token, payload);
 
         enqueueSnackbar("Event created successfully!", {
           variant: "success",

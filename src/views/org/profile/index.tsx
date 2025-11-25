@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { IoPersonCircle, IoMail, IoShieldCheckmark, IoCalendar, IoPeople, IoTrendingUp, IoPencil } from "react-icons/io5";
+import { IoPersonCircle, IoMail, IoShieldCheckmark, IoCalendar, IoPeople, IoTrendingUp, IoPencil, IoGift } from "react-icons/io5";
 
 export default function OrganizerProfilePage() {
   const { data: session, status } = useSession();
@@ -111,6 +111,16 @@ export default function OrganizerProfilePage() {
                   {session.user.email}
                 </p>
                 <p className="text-xs text-muted/60 mt-1">Contact email for event inquiries</p>
+              </div>
+
+              <div>
+                <label className="flex items-center gap-2 text-sm text-muted font-medium mb-2">
+                  <IoGift className="h-4 w-4" />
+                  Refferal Code
+                </label>
+                <p className="text-lg text-clear bg-secondary px-4 py-3 rounded-lg">
+                  {session.user.refferalCode}
+                </p>
               </div>
 
               <div>
