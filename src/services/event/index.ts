@@ -50,17 +50,22 @@ export async function getMyEvents(
   params: GetMyEventsParams = {},
 ) {
   try {
-    const { data } = await axios.get<MyEventsResponse>(
-      `${baseUrl}/events/me/adv`,
-      {
-        params,
-        headers: getAuthHeader(token),
-      },
-    );
+    const { data } = await axios.get<MyEventsResponse>(`${baseUrl}/events/me`, {
+      params,
+      headers: getAuthHeader(token),
+    });
 
     return data;
   } catch (err) {
-    console.error("getMyEvents error:", err);
+    if (axios.isAxiosError(err)) {
+      console.error(
+        "[getMyEvents] error",
+        err.response?.status,
+        err.response?.data,
+      );
+    } else {
+      console.error("[getMyEvents] unknown error", err);
+    }
     throw err;
   }
 }

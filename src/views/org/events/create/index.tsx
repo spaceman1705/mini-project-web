@@ -1,15 +1,20 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useSnackbar } from "notistack";
 import { useSession } from "next-auth/react";
 
-import { createEventApi, getEventCategories } from "@/services/event";
-import type { CreateEventPayload } from "@/types/event";
+import {
+  createEventApi,
+  getEventCategories,
+  getEventDetail,
+  updateEventApi,
+} from "@/services/event";
+import type { CreateEventPayload, UpdateEventPayload } from "@/types/event";
 
 type CreateEventFormValues = {
   title: string;
@@ -54,6 +59,21 @@ function isAxiosError(
   return typeof error === "object" && error !== null && "response" in error;
 }
 
+function isoToLocalInput(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+
+  const year = d.getFullYear();
+  const month = pad(d.getMonth() + 1);
+  const day = pad(d.getDate());
+  const hours = pad(d.getHours());
+  const minutes = pad(d.getMinutes());
+
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
 export default function OrganizerEventCreateViews() {
   const { data: session, status } = useSession();
   const [categories, setCategories] = useState<string[]>([]);
@@ -63,12 +83,21 @@ export default function OrganizerEventCreateViews() {
   const router = useRouter();
   const { enqueueSnackbar } = useSnackbar();
 
+  const searchParams = useSearchParams();
+  const editID = searchParams.get("edit");
+  const editSlug = searchParams.get("slug");
+  const isEditMode = Boolean(editID);
+
+  const [eventLoading, setEventLoading] = useState(false);
+
+  // redirect kalau belum login
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/auth/login");
     }
   }, [status, router]);
 
+  // fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -137,33 +166,55 @@ export default function OrganizerEventCreateViews() {
         const startDateIso = new Date(values.startDate).toISOString();
         const endDateIso = new Date(values.endDate).toISOString();
 
-        const payload: CreateEventPayload = {
-          title: values.title,
-          description: values.description,
-          category: values.category,
-          location: values.location,
-          startDate: startDateIso,
-          endDate: endDateIso,
-          price: Number(values.price),
-          availableSeats: Number(values.availableSeats),
-          status: values.status,
-          image: values.image,
-        };
+        if (isEditMode && editID) {
+          const payload: UpdateEventPayload = {
+            title: values.title,
+            description: values.description,
+            category: values.category,
+            location: values.location,
+            startDate: startDateIso,
+            endDate: endDateIso,
+            price: Number(values.price),
+            availableSeats: Number(values.availableSeats),
+            status: values.status,
+          };
 
-        await createEventApi(token, payload);
+          await updateEventApi(token, editID, payload);
 
-        enqueueSnackbar("Event created successfully!", {
-          variant: "success",
-        });
+          enqueueSnackbar("Event updated successfully!", {
+            variant: "success",
+          });
+        } else {
+          const payload: CreateEventPayload = {
+            title: values.title,
+            description: values.description,
+            category: values.category,
+            location: values.location,
+            startDate: startDateIso,
+            endDate: endDateIso,
+            price: Number(values.price),
+            availableSeats: Number(values.availableSeats),
+            status: values.status,
+            image: values.image,
+          };
 
-        resetForm();
-        setImagePreview(null);
+          await createEventApi(token, payload);
+
+          enqueueSnackbar("Event created successfully!", {
+            variant: "success",
+          });
+
+          resetForm();
+          setImagePreview(null);
+        }
 
         router.push("/org/events");
       } catch (err: unknown) {
-        console.error("Create event failed:", err);
+        console.error("Create/update event failed:", err);
 
-        let message = "Failed to create event";
+        let message = isEditMode
+          ? "Failed to update event"
+          : "Failed to create event";
         if (isAxiosError(err)) {
           message = err.response?.data?.message ?? message;
         }
@@ -177,6 +228,7 @@ export default function OrganizerEventCreateViews() {
     },
   });
 
+  // ambil destructuring di sini supaya bisa dipakai di deps useEffect
   const {
     values,
     errors,
@@ -185,8 +237,72 @@ export default function OrganizerEventCreateViews() {
     handleBlur,
     handleSubmit,
     setFieldValue,
+    setValues,
     isSubmitting,
   } = formik;
+
+  // load data event saat edit
+  useEffect(() => {
+    if (!isEditMode || !editSlug) return;
+
+    let cancelled = false;
+
+    const loadEvent = async () => {
+      setEventLoading(true);
+      try {
+        const res = await getEventDetail(editSlug);
+        const event = res.data;
+
+        if (!event) {
+          if (!cancelled) {
+            enqueueSnackbar("Event not found.", { variant: "error" });
+            router.push("/org/events");
+          }
+          return;
+        }
+
+        if (cancelled) return;
+
+        setValues({
+          title: event.title ?? "",
+          description: event.description ?? "",
+          category: event.category ?? "",
+          location: event.location ?? "",
+          startDate: isoToLocalInput(event.startDate),
+          endDate: isoToLocalInput(event.endDate),
+          price: event.price != null ? String(event.price) : "",
+          availableSeats:
+            event.availableSeats != null ? String(event.availableSeats) : "",
+          status:
+            (event.status as "DRAFT" | "PUBLISHED") === "PUBLISHED"
+              ? "PUBLISHED"
+              : "DRAFT",
+          image: null,
+        });
+
+        if (event.bannerImg) {
+          setImagePreview(event.bannerImg);
+        }
+      } catch (err) {
+        console.error("Failed to load event for editing:", err);
+        if (!cancelled) {
+          enqueueSnackbar("Failed to load event data for editing.", {
+            variant: "error",
+          });
+        }
+      } finally {
+        if (!cancelled) {
+          setEventLoading(false);
+        }
+      }
+    };
+
+    loadEvent();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isEditMode, editSlug, enqueueSnackbar, router, setValues]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.currentTarget.files?.[0] ?? null;
@@ -200,10 +316,12 @@ export default function OrganizerEventCreateViews() {
     }
   };
 
-  if (status === "loading") {
+  if (status === "loading" || (isEditMode && eventLoading)) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-8">
-        <p className="text-muted text-sm">Loading session...</p>
+        <p className="text-muted text-sm">
+          {isEditMode ? "Loading event data..." : "Loading session..."}
+        </p>
       </div>
     );
   }
@@ -211,7 +329,7 @@ export default function OrganizerEventCreateViews() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <h1 className="text-clear mb-6 text-2xl font-semibold tracking-tight">
-        Create New Event
+        {isEditMode ? "Edit Event" : "Create New Event"}
       </h1>
 
       <form
@@ -468,7 +586,13 @@ export default function OrganizerEventCreateViews() {
             disabled={isSubmitting}
             className="from-accent1-primary to-accent2-primary text-accent-foreground hover:from-accent1-hover hover:text-clear hover:to-accent2-hover text-clear-invert rounded-xl bg-linear-to-r px-4 py-2 text-sm font-semibold shadow-sm transition hover:bg-linear-to-r disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSubmitting ? "Creating..." : "Create Event"}
+            {isSubmitting
+              ? isEditMode
+                ? "Saving..."
+                : "Creating..."
+              : isEditMode
+                ? "Save Changes"
+                : "Create Event"}
           </button>
         </div>
       </form>

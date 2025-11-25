@@ -9,37 +9,65 @@
   --color-primary: hsl(0 0% 80%);
   --color-secondary: hsl(0 0% 90%);
   --color-tertiary: hsl(0 0% 100%);
+
   --color-primary-invert: hsl(0 0% 0%);
   --color-secondary-invert: hsl(0 0% 10%);
   --color-tertiary-invert: hsl(0 0% 20%);
+
   --color-clear: hsl(0 0% 5%);
   --color-muted: hsl(0 0% 30%);
+
   --color-clear-invert: hsl(0 0% 95%);
   --color-muted-invert: hsl(0 0% 70%);
+
   --color-accent1-primary: hsl(245 50% 50%);
   --color-accent1-hover: hsl(245 50% 75%);
+
   --color-accent2-primary: hsl(310 50% 50%);
   --color-accent2-hover: hsl(310 50% 75%);
+
   --color-lines: hsl(0 0% 0% / 15%);
+
+  --color-error-bg: hsl(355 100% 97%);
+  --color-error-border: hsl(355 100% 88%);
+  --color-error-text: hsl(350 65% 32%);
+
+  --color-empty-bg: hsl(215 25% 97%);
+  --color-empty-border: hsl(215 20% 85%);
+  --color-empty-text: hsl(215 16% 42%);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: hsl(0 0% 0%);
     --foreground: hsl(0 0% 95%);
+
     --color-primary: hsl(0 0% 0%);
     --color-secondary: hsl(0 0% 10%);
     --color-tertiary: hsl(0 0% 20%);
+
     --color-primary-invert: hsl(0 0% 80%);
     --color-secondary-invert: hsl(0 0% 90%);
     --color-tertiary-invert: hsl(0 0% 100%);
+
     --color-clear: hsl(0 0% 95%);
     --color-muted: hsl(0 0% 70%);
+
     --color-clear-invert: hsl(0 0% 5%);
     --color-muted-invert: hsl(0 0% 30%);
+
     --color-accent1-hover: hsl(245 50% 25%);
     --color-accent2-hover: hsl(310 50% 25%);
+
     --color-lines: hsl(0 0% 100% / 10%);
+
+    --color-error-bg: hsl(350 50% 18%);
+    --color-error-border: hsl(350 55% 32%);
+    --color-error-text: hsl(0 86% 96%);
+
+    --color-empty-bg: hsl(220 15% 16%);
+    --color-empty-border: hsl(220 10% 35%);
+    --color-empty-text: hsl(220 11% 78%);
   }
 }
 
