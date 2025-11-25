@@ -57,8 +57,8 @@ export default function FiltersBar({
   return (
     <section className="mb-6 space-y-4">
       {/* Category chips */}
-      <div className="no-scrollbar -mx-4 overflow-x-auto px-4">
-        <div className="flex gap-2 text-nowrap">
+      <div className="no-scrollbar -mx-4 overflow-x-auto px-4 md:overflow-visible">
+        <div className="flex gap-2 text-nowrap md:flex-wrap md:whitespace-normal">
           {allCategories.map((cat) => (
             <button
               key={cat}

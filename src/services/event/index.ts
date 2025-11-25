@@ -50,10 +50,13 @@ export async function getMyEvents(
   params: GetMyEventsParams = {},
 ) {
   try {
-    const { data } = await axios.get<MyEventsResponse>(`${baseUrl}/events/me`, {
-      params,
-      headers: getAuthHeader(token),
-    });
+    const { data } = await axios.get<MyEventsResponse>(
+      `${baseUrl}/events/me/adv`,
+      {
+        params,
+        headers: getAuthHeader(token),
+      },
+    );
 
     return data;
   } catch (err) {

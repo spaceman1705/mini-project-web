@@ -3,16 +3,66 @@ import type { ApiResponse } from "./api";
 export type EventStatus = "DRAFT" | "PUBLISHED" | "CANCELED" | "FINISHED";
 
 export type EventCategory =
-  | "Music"
-  | "Nightlife"
-  | "Art"
-  | "Holiday"
-  | "Dating"
-  | "Hobby"
   | "Business"
-  | "Food & Drink";
+  | "Food & Drink"
+  | "Health"
+  | "Music"
+  | "Auto, Boat & Air"
+  | "Charity & Causes"
+  | "Community"
+  | "Family & Education"
+  | "Fashion"
+  | "Film & Media"
+  | "Hobbies"
+  | "Home & Lifestyle"
+  | "Performing & Visual Arts"
+  | "Government"
+  | "Spirituality"
+  | "School Activities"
+  | "Science & Tech"
+  | "Holidays"
+  | "Sports & Fitness"
+  | "Travel & Outdoor"
+  | "Other"
+  | "Nightlife"
+  | "Dating";
 
 export type EventTag = "Online" | "Family" | "Limited";
+
+export const HomePageCategories: EventCategory[] = [
+  "Holidays",
+  "Music",
+  "Nightlife",
+  "Performing & Visual Arts",
+  "Dating",
+  "Hobbies",
+  "Business",
+  "Food & Drink",
+];
+
+export const EventPageCategories: EventCategory[] = [
+  "Business",
+  "Food & Drink",
+  "Health",
+  "Music",
+  "Auto, Boat & Air",
+  "Charity & Causes",
+  "Community",
+  "Family & Education",
+  "Fashion",
+  "Film & Media",
+  "Hobbies",
+  "Home & Lifestyle",
+  "Performing & Visual Arts",
+  "Government",
+  "Spirituality",
+  "School Activities",
+  "Science & Tech",
+  "Holidays",
+  "Sports & Fitness",
+  "Travel & Outdoor",
+  "Other",
+];
 
 export type EventListItem = {
   id: string;
@@ -37,7 +87,6 @@ export type EventListData = {
 
 export type EventListResponse = ApiResponse<EventListData>;
 
-// for /events/categories endpoint
 export type EventCategoriesResponse = ApiResponse<string[]>;
 
 export type EventDetail = {
@@ -94,6 +143,9 @@ export type MyEventListItem = {
   price: number;
   availableSeats: number;
   bannerImg?: string | null;
+  category: string;
+  location: string;
+  createdAt: string;
 };
 
 export type MyEventsListData = {
@@ -126,7 +178,16 @@ export type GetEventsParams = {
 export type GetMyEventsParams = {
   page?: number;
   pageSize?: number;
-  status?: EventStatus;
+  q?: string;
+  category?: string;
+  location?: string;
+  date?: "today" | "weekend" | "month" | "upcoming";
+  start?: string;
+  end?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  status?: EventStatus | "ALL";
+  sort?: EventSortOption;
 };
 
 export type CreateEventPayload = {
