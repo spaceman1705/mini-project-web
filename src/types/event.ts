@@ -219,6 +219,8 @@ export type TicketTypeInput = {
   quota: number;
 };
 
+export type UpdateTicketTypePayload = Partial<TicketTypeInput>;
+
 export type CreateVoucherPayload = {
   code: string;
   discountAmount: number;
