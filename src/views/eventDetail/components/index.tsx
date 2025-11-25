@@ -9,9 +9,15 @@ import {
   PiTicket,
   PiUsersThree,
   PiStarFill,
+  PiWarningCircle, // TAMBAHAN: Icon Error
+  PiSpinner,       // TAMBAHAN: Icon Loading
 } from "react-icons/pi";
 
 import type { EventDetail } from "@/types/event";
+import { createTransaction } from "@/services/transaction";
+import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 type EventDetailViewClientProps = {
   event: EventDetail;
@@ -84,6 +90,75 @@ export default function EventDetailViewClient({
     : `IDR ${event.price.toLocaleString("id-ID")}`;
 
   const remainingSeats = event.availableSeats;
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  const [quantity, setQuantity] = useState(1);
+  const [errorMsg, setErrorMsg] = useState("");
+  // TAMBAHAN: State untuk loading
+  const [isLoading, setIsLoading] = useState(false);
+  console.log("Data Event Diterima:", event);
+  console.log("Ticket Types:", event.ticketType);
+  // PERBAIKAN: Fungsi handleCheckout yang lebih lengkap
+  async function handleCheckout() {
+    // 1. Reset error lama
+    setErrorMsg("");
+
+    // 2. Cek Login
+    if (!session?.access_token) {
+      // Opsi: Simpan url saat ini agar bisa redirect balik setelah login
+      return router.push("/login");
+    }
+
+    // 3. Mulai Loading
+    setIsLoading(true);
+
+    try {
+      // VALIDASI STOK
+      if (remainingSeats != null && quantity > remainingSeats) {
+        throw new Error(`Stok hanya tersedia ${remainingSeats} tiket`);
+      }
+
+      const ticketType = event.ticketType?.[0];
+      if (!ticketType) {
+        throw new Error("Ticket type tidak ditemukan.");
+      }
+
+      const payload = {
+        eventId: event.id,
+        ticketTypeId: ticketType.id,
+        quantity,
+      };
+
+      // Debugging log (bisa dilihat di Inspect Element -> Console)
+      console.log("Mengirim payload:", payload);
+
+      const result = await createTransaction(session.access_token, payload);
+
+      console.log("Transaksi sukses:", result);
+      const transactionId = result.data?.id; // Ambil ID dari result.data
+
+      if (transactionId) {
+        router.push(`/transactions/${transactionId}`);
+      } else {
+        // Opsional: Redirect ke halaman /transactions jika ID tidak ditemukan
+        router.push(`/transactions`);
+      }
+
+      // Note: Tidak perlu set setIsLoading(false) di sini karena halaman akan pindah
+    } catch (err: unknown) {
+      console.error("Checkout Error:", err);
+
+      const errorMessage = err instanceof Error ? err.message : "Checkout gagal";
+      // Coba ambil pesan error spesifik dari backend (axios response)
+      const apiMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+
+      setErrorMsg(apiMessage || errorMessage);
+
+      // Matikan loading agar user bisa coba lagi
+      setIsLoading(false);
+    }
+  }
 
   return (
     <main className="mx-auto max-w-[1440px] px-4 py-6 sm:py-8">
@@ -264,7 +339,7 @@ export default function EventDetailViewClient({
 
         {/* Right: sidebar */}
         <aside className="w-full space-y-4 lg:w-[320px]">
-          <div className="bg-secondary border-lines rounded-3xl border p-4 sm:p-5">
+          <div className="bg-secondary border-lines rounded-3xl border p-4 sm:p-5 sticky top-4">
             <div className="mb-3 flex items-center justify-between">
               <span className="text-muted text-xs">From</span>
               {remainingSeats != null && (
@@ -275,14 +350,31 @@ export default function EventDetailViewClient({
             </div>
             <div className="mb-4 text-2xl font-semibold">{priceLabel}</div>
 
+            {/* ERROR MESSAGE DISPLAY */}
+            {errorMsg && (
+              <div className="mb-3 flex items-start gap-2 rounded-lg bg-red-50 p-3 text-xs text-red-600 border border-red-100">
+                <PiWarningCircle className="mt-0.5 shrink-0 text-base" />
+                <span className="break-words">{errorMsg}</span>
+              </div>
+            )}
+
             <button
               type="button"
-              className="inline-flex w-full items-center justify-center rounded-xl bg-black px-4 py-2.5 text-sm font-medium text-white hover:bg-neutral-900"
+              onClick={handleCheckout}
+              disabled={isLoading}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-medium text-white hover:bg-neutral-900 disabled:bg-neutral-500 disabled:cursor-not-allowed transition-colors"
             >
-              Get Tickets
+              {isLoading ? (
+                <>
+                  <PiSpinner className="animate-spin text-lg" />
+                  <span>Processing...</span>
+                </>
+              ) : (
+                "Get Tickets"
+              )}
             </button>
 
-            <p className="text-muted mt-2 text-xs">
+            <p className="text-muted mt-2 text-xs text-center">
               You&apos;ll be redirected to checkout to complete your booking.
             </p>
           </div>

@@ -171,7 +171,7 @@ export default function OrganizerDashboard() {
             <p className="text-muted">Welcome back, {session.user.firstname}!</p>
           </div>
           <button
-            onClick={() => router.push("/organizer/events/create")}
+            onClick={() => router.push("/org/events/create")}
             className="flex items-center gap-2 bg-linear-to-r/oklch from-accent1-primary to-accent2-primary text-white font-semibold px-6 py-3 rounded-xl hover:opacity-90 transition shadow-lg"
           >
             <IoAddCircle className="h-5 w-5" />

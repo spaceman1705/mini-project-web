@@ -17,6 +17,7 @@ declare module "next-auth" {
       firstname: string;
       lastname: string;
       role: string;
+      accessToken: string;
     };
     accessToken?: string | null;
     error?: string | null;

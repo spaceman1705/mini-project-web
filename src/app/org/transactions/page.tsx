@@ -1,5 +1,5 @@
-import OrganizerTransactionsView from "@/views/org/transactions";
+import OrganizerTransactions from "@/views/org/transactions";
 
 export default function OrganizerTransactionsPage() {
-  return <OrganizerTransactionsView />;
+  return <OrganizerTransactions />;
 }

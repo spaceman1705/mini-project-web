@@ -2,11 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useSnackbar } from "notistack";
-import { useSession } from "next-auth/react";
 
 import { createEventApi, getEventCategories } from "@/services/event";
 import type { CreateEventPayload } from "@/types/event";
@@ -150,7 +150,7 @@ export default function OrganizerEventCreateViews() {
           image: values.image,
         };
 
-        await createEventApi(token, payload);
+        await createEventApi(session.access_token, payload);
 
         enqueueSnackbar("Event created successfully!", {
           variant: "success",
