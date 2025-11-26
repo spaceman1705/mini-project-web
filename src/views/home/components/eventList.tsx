@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { PiMapPin } from "react-icons/pi";
+import Image from "next/image";
+import { PiClock, PiMapPin } from "react-icons/pi";
 
 import type { HomeEvent } from "@/types/event";
 
@@ -15,6 +16,18 @@ type EventListSectionProps = {
   timeFilter: TimeFilter;
   onTimeFilterChange: (value: TimeFilter) => void;
 };
+
+function formatDateTime(dateStr: string) {
+  const d = new Date(dateStr);
+  return d.toLocaleString("en-GB", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 export default function EventListSection({
   events,
@@ -59,7 +72,7 @@ export default function EventListSection({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {events.map((event) => (
             <article
               key={event.id}
@@ -104,39 +117,60 @@ export default function EventListSection({
                 <span>{event.location}</span>
               </p>
 
-              <div className="mt-3 flex items-center justify-between text-sm">
-                <span className="text-muted">{event.category}</span>
-                <span className="font-medium">
-                  {event.price === null || event.price === 0
-                    ? "Free"
-                    : `IDR ${event.price.toLocaleString("id-ID")}`}
-                </span>
-              </div>
+                <div className="flex flex-1 flex-col gap-3 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <h4 className="line-clamp-2 text-base leading-snug font-semibold">
+                      <Link
+                        href={`/events/${event.slug}`}
+                        className="hover:underline"
+                      >
+                        {event.title}
+                      </Link>
+                    </h4>
 
-              {event.tags && event.tags.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {event.tags.map((tag) => (
                     <span
-                      key={tag}
-                      className="text-muted border-lines rounded-md border px-2 py-0.5 text-xs"
+                      className={
+                        "shrink-0 rounded-full px-2 py-0.5 text-xs " +
+                        (event.price === null || event.price === 0
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "bg-amber-100 text-amber-700")
+                      }
                     >
-                      {tag}
+                      {event.price === null || event.price === 0
+                        ? "Free"
+                        : `IDR ${event.price.toLocaleString("id-ID")}`}
                     </span>
-                  ))}
-                </div>
-              )}
+                  </div>
 
-              <div className="mt-auto flex items-center justify-between gap-2">
-                <Link
-                  href={`/events/${event.slug}`}
-                  className="bg-primary border-lines hover:bg-tertiary mt-4 inline-flex w-full items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium transition"
-                >
-                  View details
-                </Link>
-              </div>
-            </article>
+                  <div className="text-muted flex items-center gap-2 text-sm">
+                    <PiMapPin className="shrink-0" />
+                    <span className="line-clamp-1">
+                      {event.location || "Location TBA"}
+                    </span>
+                  </div>
+
+                  <div className="text-muted flex items-center gap-2 text-sm">
+                    <PiClock className="shrink-0" />
+                    <span>{formatDateTime(event.date)}</span>
+                  </div>
+
+                  {event.tags && event.tags.length > 0 && (
+                    <div className="mt-1 flex flex-wrap gap-2">
+                      {event.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="border-lines bg-tertiary text-muted rounded-full border px-2 py-0.5 text-xs"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </article>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </section>
   );

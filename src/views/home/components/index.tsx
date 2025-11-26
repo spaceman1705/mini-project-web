@@ -6,7 +6,6 @@ import type { HomeEvent } from "@/types/event";
 import HeroSection from "./hero";
 import CategorySection from "./category";
 import EventListSection, { type TimeFilter } from "./eventList";
-import NewsLetterSection from "./newsLetter";
 
 export type HomeViewClientProps = {
   initialEvents: HomeEvent[];
@@ -88,7 +87,7 @@ export default function HomeViewClient({
   }, [initialEvents, activeCategory, keyword, location, timeFilter, onlyFree]);
 
   return (
-    <div className="mx-auto mt-4 max-w-[1440px] px-4">
+    <div className="mx-auto mt-4 max-w-[1440px] px-4 pb-4">
       <HeroSection
         keyword={keyword}
         location={location}
@@ -112,8 +111,6 @@ export default function HomeViewClient({
         timeFilter={timeFilter}
         onTimeFilterChange={setTimeFilter}
       />
-
-      <NewsLetterSection />
     </div>
   );
 }

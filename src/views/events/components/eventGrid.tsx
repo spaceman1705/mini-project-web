@@ -77,7 +77,7 @@ export default function EventsGrid({
                   />
                 ) : (
                   <div className="text-muted absolute inset-0 flex items-center justify-center text-xs">
-                    No image
+                    NO BANNER
                   </div>
                 )}
               </div>

@@ -3,16 +3,70 @@ import type { ApiResponse } from "./api";
 export type EventStatus = "DRAFT" | "PUBLISHED" | "CANCELED" | "FINISHED";
 
 export type EventCategory =
-  | "Music"
-  | "Nightlife"
-  | "Art"
-  | "Holiday"
-  | "Dating"
-  | "Hobby"
   | "Business"
-  | "Food & Drink";
+  | "Food & Drink"
+  | "Health"
+  | "Music"
+  | "Auto, Boat & Air"
+  | "Charity & Causes"
+  | "Community"
+  | "Family & Education"
+  | "Fashion"
+  | "Film & Media"
+  | "Hobbies"
+  | "Home & Lifestyle"
+  | "Performing & Visual Arts"
+  | "Government"
+  | "Spirituality"
+  | "School Activities"
+  | "Science & Tech"
+  | "Holidays"
+  | "Sports & Fitness"
+  | "Travel & Outdoor"
+  | "Other"
+  | "Nightlife"
+  | "Dating";
 
 export type EventTag = "Online" | "Family" | "Limited";
+
+export type EventSortOption = "newest" | "oldest" | "price_asc" | "price_desc";
+
+export type DateFilterKey = "today" | "weekend" | "month" | "upcoming";
+
+export const HomePageCategories: EventCategory[] = [
+  "Holidays",
+  "Music",
+  "Nightlife",
+  "Performing & Visual Arts",
+  "Dating",
+  "Hobbies",
+  "Business",
+  "Food & Drink",
+];
+
+export const EventPageCategories: EventCategory[] = [
+  "Business",
+  "Food & Drink",
+  "Health",
+  "Music",
+  "Auto, Boat & Air",
+  "Charity & Causes",
+  "Community",
+  "Family & Education",
+  "Fashion",
+  "Film & Media",
+  "Hobbies",
+  "Home & Lifestyle",
+  "Performing & Visual Arts",
+  "Government",
+  "Spirituality",
+  "School Activities",
+  "Science & Tech",
+  "Holidays",
+  "Sports & Fitness",
+  "Travel & Outdoor",
+  "Other",
+];
 
 export type EventListItem = {
   id: string;
@@ -27,18 +81,20 @@ export type EventListItem = {
   availableSeats?: number | null;
 };
 
-export type EventListData = {
-  items: EventListItem[];
-  page: number;
-  pageSize: number;
-  total: number;
-  totalPages: number;
+export type MyEventListItem = {
+  id: string;
+  title: string;
+  slug: string;
+  status: EventStatus;
+  startDate: string;
+  endDate: string;
+  price: number;
+  availableSeats: number;
+  bannerImg?: string | null;
+  category: string;
+  location: string;
+  createdAt: string;
 };
-
-export type EventListResponse = ApiResponse<EventListData>;
-
-// for /events/categories endpoint
-export type EventCategoriesResponse = ApiResponse<string[]>;
 
 export type EventDetail = {
   id: string;
@@ -82,31 +138,34 @@ export type EventDetail = {
   }[];
 };
 
-export type EventDetailResponse = ApiResponse<EventDetail>;
-
-export type MyEventListItem = {
+export type HomeEvent = {
   id: string;
-  title: string;
   slug: string;
-  status: EventStatus;
-  startDate: string;
-  endDate: string;
-  price: number;
-  availableSeats: number;
+  title: string;
+  category: string;
+  location: string;
+  date: string;
+  price: number | null;
   bannerImg?: string | null;
+  tags?: EventTag[];
 };
 
-export type MyEventsListData = {
-  items: MyEventListItem[];
+export type PaginatedResult<TItem> = {
+  items: TItem[];
   page: number;
   pageSize: number;
   total: number;
   totalPages: number;
 };
 
-export type MyEventsResponse = ApiResponse<MyEventsListData>;
+export type EventListData = PaginatedResult<EventListItem>;
+export type MyEventsListData = PaginatedResult<MyEventListItem>;
 
-export type EventSortOption = "newest" | "oldest" | "price_asc" | "price_desc";
+export type EventListResponse = ApiResponse<EventListData>;
+export type MyEventsResponse = ApiResponse<MyEventsListData>;
+export type EventDetailResponse = ApiResponse<EventDetail>;
+
+export type EventCategoriesResponse = ApiResponse<string[]>;
 
 export type GetEventsParams = {
   page?: number;
@@ -126,7 +185,16 @@ export type GetEventsParams = {
 export type GetMyEventsParams = {
   page?: number;
   pageSize?: number;
-  status?: EventStatus;
+  q?: string;
+  category?: string;
+  location?: string;
+  date?: DateFilterKey;
+  start?: string;
+  end?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  status?: EventStatus | "ALL";
+  sort?: EventSortOption;
 };
 
 export type CreateEventPayload = {
@@ -142,17 +210,7 @@ export type CreateEventPayload = {
   image?: File | null;
 };
 
-export type UpdateEventPayload = {
-  title?: string;
-  description?: string;
-  category?: string;
-  location?: string;
-  startDate?: string;
-  endDate?: string;
-  price?: number;
-  availableSeats?: number;
-  status?: EventStatus;
-};
+export type UpdateEventPayload = Partial<Omit<CreateEventPayload, "image">>;
 
 export type TicketTypeInput = {
   name: string;
@@ -161,21 +219,11 @@ export type TicketTypeInput = {
   quota: number;
 };
 
+export type UpdateTicketTypePayload = Partial<TicketTypeInput>;
+
 export type CreateVoucherPayload = {
   code: string;
   discountAmount: number;
   expiredAt: string;
   maxUsage?: number;
-};
-
-export type HomeEvent = {
-  id: string;
-  slug: string;
-  title: string;
-  category: string;
-  location: string;
-  date: string;
-  price: number | null;
-  bannerImg?: string | null;
-  tags?: EventTag[];
 };
