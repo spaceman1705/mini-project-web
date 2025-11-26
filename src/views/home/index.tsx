@@ -1,6 +1,7 @@
 import HomeViewClient from "./components";
 import type { HomeEvent, EventTag } from "@/types/event";
-import { getEvents, getEventCategories } from "@/services/event";
+import { getEvents } from "@/services/event";
+import { HomePageCategories } from "@/types/event";
 
 const defaultPage = 1;
 const defaultPageSize = 8;
@@ -12,14 +13,11 @@ type HomeInitialData = {
 
 async function fetchHomeData(): Promise<HomeInitialData> {
   try {
-    const [eventsRes, categoriesRes] = await Promise.all([
-      getEvents({
-        page: defaultPage,
-        pageSize: defaultPageSize,
-        sort: "newest",
-      }),
-      getEventCategories(),
-    ]);
+    const eventsRes = await getEvents({
+      page: defaultPage,
+      pageSize: defaultPageSize,
+      sort: "newest",
+    });
 
     const items = eventsRes.data?.items ?? [];
 
@@ -50,19 +48,15 @@ async function fetchHomeData(): Promise<HomeInitialData> {
       };
     });
 
-    const categories = Array.isArray(categoriesRes.data)
-      ? categoriesRes.data
-      : [];
-
     return {
       events: mappedEvents,
-      categories,
+      categories: HomePageCategories,
     };
   } catch (err) {
     console.error("[Home] Error while fetching initial data:", err);
     return {
       events: [],
-      categories: [],
+      categories: HomePageCategories,
     };
   }
 }

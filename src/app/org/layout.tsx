@@ -16,7 +16,7 @@ type OrgNavItem = {
   description?: string;
 };
 
-const ORG_NAV_ITEMS: OrgNavItem[] = [
+const orgNavItems: OrgNavItem[] = [
   {
     href: "/org/dashboard",
     label: "Overview",
@@ -30,7 +30,7 @@ const ORG_NAV_ITEMS: OrgNavItem[] = [
     description: "Manage all your events",
   },
   {
-    href: "/org/transactions",
+    href: "/org/tickets",
     label: "Tickets & Orders",
     icon: <PiTicket className="h-4 w-4" />,
     description: "Track sales & attendees",
@@ -66,21 +66,23 @@ export default function OrgLayout({ children }: OrgLayoutProps) {
         </div>
 
         <nav className="space-y-1">
-          {ORG_NAV_ITEMS.map((item) => {
+          {orgNavItems.map((item) => {
             const active = isActive(item.href);
 
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`group flex items-start gap-3 rounded-xl px-3 py-2 text-sm transition ${active
+                className={`group flex items-start gap-3 rounded-xl px-3 py-2 text-sm transition ${
+                  active
                     ? "bg-primary-invert text-clear-invert shadow-sm"
                     : "text-muted hover:bg-tertiary hover:text-clear"
-                  }`}
+                }`}
               >
                 <div
-                  className={`border-lines bg-tertiary mt-0.5 flex h-7 w-7 items-center justify-center rounded-full border text-xs ${active ? "text-clear" : "text-muted"
-                    }`}
+                  className={`border-lines bg-tertiary mt-0.5 flex h-7 w-7 items-center justify-center rounded-full border text-xs ${
+                    active ? "text-clear" : "text-muted"
+                  }`}
                 >
                   {item.icon}
                 </div>
@@ -88,7 +90,7 @@ export default function OrgLayout({ children }: OrgLayoutProps) {
                 <div className="flex flex-col">
                   <span className="font-semibold">{item.label}</span>
                   {item.description && (
-                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                    <span className="text-muted-invert text-xs">
                       {item.description}
                     </span>
                   )}
@@ -107,14 +109,15 @@ export default function OrgLayout({ children }: OrgLayoutProps) {
           <span className="text-base font-semibold tracking-tight">Evora</span>
         </div>
         <nav className="bg-secondary flex items-center gap-1 rounded-full p-1 text-xs">
-          {ORG_NAV_ITEMS.map((item) => (
+          {orgNavItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 font-medium transition ${isActive(item.href)
+              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 font-medium transition ${
+                isActive(item.href)
                   ? "bg-tertiary text-clear shadow-sm"
                   : "text-muted hover:text-clear"
-                }`}
+              }`}
             >
               {item.icon}
               <span>{item.label}</span>
