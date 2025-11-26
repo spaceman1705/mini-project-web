@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { IoPersonCircle, IoMail, IoShieldCheckmark, IoSettings, IoPeople, IoCalendar, IoStatsChart, IoPencil } from "react-icons/io5";
+import { IoPersonCircle, IoMail, IoShieldCheckmark, IoSettings, IoPeople, IoCalendar, IoStatsChart, IoPencil, IoGift } from "react-icons/io5";
 
 export default function AdminProfilePage() {
     const { data: session, status } = useSession();
@@ -126,6 +126,16 @@ export default function AdminProfilePage() {
 
                             <div>
                                 <label className="flex items-center gap-2 text-sm text-muted font-medium mb-2">
+                                    <IoGift className="h-4 w-4" />
+                                    Refferal Code
+                                </label>
+                                <p className="text-lg text-clear bg-secondary px-4 py-3 rounded-lg">
+                                    {session.user.refferalCode}
+                                </p>
+                            </div>
+
+                            <div>
+                                <label className="flex items-center gap-2 text-sm text-muted font-medium mb-2">
                                     <IoShieldCheckmark className="h-4 w-4" />
                                     Access Level
                                 </label>
@@ -184,18 +194,6 @@ export default function AdminProfilePage() {
                                 <div>
                                     <p className="text-2xl font-bold text-clear">0</p>
                                     <p className="text-sm text-muted">Reports</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-tertiary rounded-2xl shadow-xl p-6">
-                            <div className="flex items-center gap-3 mb-2">
-                                <div className="bg-orange-500/10 p-3 rounded-lg">
-                                    <IoSettings className="h-6 w-6 text-orange-500" />
-                                </div>
-                                <div>
-                                    <p className="text-sm text-muted">System Status</p>
-                                    <p className="text-lg font-semibold text-green-500">Operational</p>
                                 </div>
                             </div>
                         </div>
