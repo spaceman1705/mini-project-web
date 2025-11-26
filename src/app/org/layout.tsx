@@ -30,7 +30,7 @@ const orgNavItems: OrgNavItem[] = [
     description: "Manage all your events",
   },
   {
-    href: "/org/tickets",
+    href: "/org/transactions",
     label: "Tickets & Orders",
     icon: <PiTicket className="h-4 w-4" />,
     description: "Track sales & attendees",
@@ -73,16 +73,14 @@ export default function OrgLayout({ children }: OrgLayoutProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`group flex items-start gap-3 rounded-xl px-3 py-2 text-sm transition ${
-                  active
+                className={`group flex items-start gap-3 rounded-xl px-3 py-2 text-sm transition ${active
                     ? "bg-primary-invert text-clear-invert shadow-sm"
                     : "text-muted hover:bg-tertiary hover:text-clear"
-                }`}
+                  }`}
               >
                 <div
-                  className={`border-lines bg-tertiary mt-0.5 flex h-7 w-7 items-center justify-center rounded-full border text-xs ${
-                    active ? "text-clear" : "text-muted"
-                  }`}
+                  className={`border-lines bg-tertiary mt-0.5 flex h-7 w-7 items-center justify-center rounded-full border text-xs ${active ? "text-clear" : "text-muted"
+                    }`}
                 >
                   {item.icon}
                 </div>
@@ -113,11 +111,10 @@ export default function OrgLayout({ children }: OrgLayoutProps) {
             <Link
               key={item.href}
               href={item.href}
-              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 font-medium transition ${
-                isActive(item.href)
+              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 font-medium transition ${isActive(item.href)
                   ? "bg-tertiary text-clear shadow-sm"
                   : "text-muted hover:text-clear"
-              }`}
+                }`}
             >
               {item.icon}
               <span>{item.label}</span>

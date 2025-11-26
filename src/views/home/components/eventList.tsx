@@ -53,11 +53,10 @@ export default function EventListSection({
               key={item.value}
               type="button"
               onClick={() => onTimeFilterChange(item.value)}
-              className={`rounded-full px-3 py-1 text-xs ${
-                timeFilter === item.value
+              className={`rounded-full px-3 py-1 text-xs ${timeFilter === item.value
                   ? "bg-black text-white"
                   : "border-lines bg-tertiary text-muted border"
-              }`}
+                }`}
             >
               {item.label}
             </button>
@@ -75,22 +74,48 @@ export default function EventListSection({
       ) : (
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {events.map((event) => (
-            <li key={event.id}>
-              <article className="group border-lines bg-secondary flex h-full flex-col overflow-hidden rounded-2xl border transition hover:shadow-md">
-                <div className="bg-tertiary relative h-36 w-full">
-                  {event.bannerImg ? (
-                    <Image
-                      src={event.bannerImg}
-                      alt={event.title}
-                      fill
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="text-muted absolute inset-0 flex items-center justify-center text-xs">
-                      NO BANNER
-                    </div>
-                  )}
+            <article
+              key={event.id}
+              className="bg-secondary border-lines flex h-full flex-col rounded-2xl border p-4 shadow-lg"
+            >
+              {/* Thumbnail placeholder */}
+              <Link href={`/events/${event.slug}`} className="mb-3">
+                <div
+                  className={`h-32 w-full rounded-xl bg-cover bg-center ${event.bannerImg ? "" : "bg-tertiary"
+                    }`}
+                  style={
+                    event.bannerImg
+                      ? { backgroundImage: `url(${event.bannerImg})` }
+                      : {}
+                  }
+                >
                 </div>
+              </Link>
+
+              <div className="text-muted mb-2 flex items-center justify-between text-xs">
+                <span>
+                  {new Date(event.date).toLocaleDateString("id-ID", {
+                    weekday: "short",
+                    day: "2-digit",
+                    month: "short",
+                  })}
+                </span>
+                <span>
+                  {new Date(event.date).toLocaleTimeString("id-ID", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              </div>
+
+              <h4 className="line-clamp-2 text-sm font-semibold">
+                {event.title}
+              </h4>
+
+              <p className="text-muted mt-1 flex items-center gap-1 text-xs">
+                <PiMapPin className="inline-block" />
+                <span>{event.location}</span>
+              </p>
 
                 <div className="flex flex-1 flex-col gap-3 p-4">
                   <div className="flex items-start justify-between gap-3">

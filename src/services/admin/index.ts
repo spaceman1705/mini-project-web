@@ -36,7 +36,7 @@ export async function getEventById(token: string, eventId: string) {
   }
 }
 
-export async function approveEvent(token: string, eventId: string) {
+export async function approveEvent(eventId: string, token: string) {
   try {
     if (!baseUrl) throw new Error("API URL not configured");
 
@@ -45,6 +45,7 @@ export async function approveEvent(token: string, eventId: string) {
       {},
       { headers: getAuthHeader(token) },
     );
+
     return data;
   } catch (err) {
     console.error("approveevent error:", err);

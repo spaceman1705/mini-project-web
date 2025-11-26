@@ -322,25 +322,6 @@ export default function AdminDashboard() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* System Alerts */}
-            {/* <div className="bg-tertiary rounded-2xl shadow-xl p-6">
-              <h3 className="text-lg font-bold text-clear mb-4">System Alerts</h3>
-              <div className="space-y-3">
-                {systemAlerts.map((alert, index) => (
-                  <div key={index} className="bg-secondary p-3 rounded-lg">
-                    <div className="flex items-start gap-2">
-                      {alert.type === 'warning' && <IoWarning className="h-5 w-5 text-yellow-500 flex-shrink-0" />}
-                      {alert.type === 'success' && <IoCheckmarkCircle className="h-5 w-5 text-green-500 flex-shrink-0" />}
-                      {alert.type === 'info' && <IoShieldCheckmark className="h-5 w-5 text-blue-500 flex-shrink-0" />}
-                      <div className="flex-1">
-                        <p className="text-xs text-clear font-semibold">{alert.message}</p>
-                        <p className="text-xs text-muted/60 mt-1">{alert.time}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div> */}
 
             {/* Quick Actions */}
             <div className="bg-tertiary rounded-2xl shadow-xl p-6">
@@ -374,29 +355,6 @@ export default function AdminDashboard() {
                   <IoShieldCheckmark className="h-5 w-5 text-orange-500" />
                   <span className="text-sm font-semibold text-clear">System Settings</span>
                 </Link>
-              </div>
-            </div>
-
-            {/* Platform Stats */}
-            <div className="bg-tertiary rounded-2xl shadow-xl p-6">
-              <h3 className="text-lg font-bold text-clear mb-4">Platform Stats</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted">Uptime</span>
-                  <span className="text-lg font-bold text-green-500">99.9%</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted">API Calls</span>
-                  <span className="text-lg font-bold text-clear">1.2M</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted">Storage Used</span>
-                  <span className="text-lg font-bold text-clear">234 GB</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted">Bandwidth</span>
-                  <span className="text-lg font-bold text-clear">4.5 TB</span>
-                </div>
               </div>
             </div>
           </div>
