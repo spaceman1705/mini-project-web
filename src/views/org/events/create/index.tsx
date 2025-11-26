@@ -6,7 +6,6 @@ import Image from "next/image";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useSnackbar } from "notistack";
-import { useSession } from "next-auth/react";
 
 import {
   addTicketTypesApi,
@@ -204,44 +203,6 @@ export default function OrganizerEventCreateViews() {
       router.push("/auth/login");
     }
   }, [status, router]);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setCategoriesLoading(true);
-        const res = await getEventCategories();
-        setCategories(res.data ?? []);
-      } catch (err) {
-        console.error("Failed to fetch categories:", err);
-        enqueueSnackbar("Failed to load categories, using default list.", {
-          variant: "warning",
-        });
-      } finally {
-        setCategoriesLoading(false);
-      }
-    };
-
-    fetchCategories();
-  }, [enqueueSnackbar]);
-
-  const defaultCategories: string[] = useMemo(
-    () => [
-      "Music",
-      "Nightlife",
-      "Art",
-      "Holiday",
-      "Dating",
-      "Hobby",
-      "Business",
-      "Food & Drink",
-    ],
-    [],
-  );
-
-  const categoryOptions = useMemo(() => {
-    if (categories.length === 0) return defaultCategories;
-    return categories;
-  }, [categories, defaultCategories]);
 
   const formik = useFormik<CreateEventFormValues>({
     initialValues: {

@@ -1,5 +1,5 @@
-import AdminDashboardView from "@/views/adm/dashboard";
+import AdminDashboard from "@/views/adm/dashboard";
 
 export default function AdminDashboardPage() {
-  return <AdminDashboardView />;
+  return <AdminDashboard />;
 }
