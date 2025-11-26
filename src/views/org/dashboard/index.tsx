@@ -42,7 +42,7 @@ interface Event {
   location: string;
   price: number;
   availableSeats: number;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  status: 'WAITING CONFIRMATION' | 'APPROVED' | 'REJECTED';
   image?: string;
   _count?: {
     transaction: number;
@@ -157,7 +157,7 @@ export default function OrganizerDashboard() {
 
   // Calculate additional stats
   const upcomingEvents = events.filter(e => new Date(e.startDate) > new Date()).length;
-  const pendingApproval = events.filter(e => e.status === "PENDING").length;
+  const pendingApproval = events.filter(e => e.status === "WAITING CONFIRMATION").length;
 
   return (
     <div className="min-h-screen bg-secondary py-8 px-4">

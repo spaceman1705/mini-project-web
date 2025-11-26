@@ -40,11 +40,10 @@ export default function EventListSection({
               key={item.value}
               type="button"
               onClick={() => onTimeFilterChange(item.value)}
-              className={`rounded-full px-3 py-1 text-xs ${
-                timeFilter === item.value
+              className={`rounded-full px-3 py-1 text-xs ${timeFilter === item.value
                   ? "bg-black text-white"
                   : "border-lines bg-tertiary text-muted border"
-              }`}
+                }`}
             >
               {item.label}
             </button>
@@ -67,7 +66,18 @@ export default function EventListSection({
               className="bg-secondary border-lines flex h-full flex-col rounded-2xl border p-4 shadow-lg"
             >
               {/* Thumbnail placeholder */}
-              <div className="bg-tertiary mb-3 h-32 w-full rounded-xl" />
+              <Link href={`/events/${event.slug}`} className="mb-3">
+                <div
+                  className={`h-32 w-full rounded-xl bg-cover bg-center ${event.bannerImg ? "" : "bg-tertiary"
+                    }`}
+                  style={
+                    event.bannerImg
+                      ? { backgroundImage: `url(${event.bannerImg})` }
+                      : {}
+                  }
+                >
+                </div>
+              </Link>
 
               <div className="text-muted mb-2 flex items-center justify-between text-xs">
                 <span>
