@@ -11,6 +11,7 @@ import type {
   TicketTypeInput,
   CreateVoucherPayload,
   EventCategoriesResponse,
+  EventVoucherListResponse,
 } from "@/types/event";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
@@ -237,7 +238,20 @@ export async function deleteTicketTypeApi(
   }
 }
 
-export async function createVoucherApi(
+export async function getEventCategories() {
+  try {
+    const { data } = await axios.get<EventCategoriesResponse>(
+      `${baseUrl}/events/categories`,
+    );
+
+    return data;
+  } catch (err) {
+    console.error("getEventCategories error:", err);
+    throw err;
+  }
+}
+
+export async function createEventVoucher(
   token: string,
   eventId: string,
   payload: CreateVoucherPayload,
@@ -253,20 +267,39 @@ export async function createVoucherApi(
 
     return data;
   } catch (err) {
-    console.error("createVoucherApi error:", err);
+    if (axios.isAxiosError(err)) {
+      console.error(
+        "[createEventVoucher] error",
+        err.response?.status,
+        err.response?.data,
+      );
+    } else {
+      console.error("[createEventVoucher] unknown error", err);
+    }
     throw err;
   }
 }
 
-export async function getEventCategories() {
+export async function getEventVouchersApi(token: string, eventId: string) {
   try {
-    const { data } = await axios.get<EventCategoriesResponse>(
-      `${baseUrl}/events/categories`,
+    const { data } = await axios.get<EventVoucherListResponse>(
+      `${baseUrl}/events/${eventId}/vouchers`,
+      {
+        headers: getAuthHeader(token),
+      },
     );
 
     return data;
   } catch (err) {
-    console.error("getEventCategories error:", err);
+    if (axios.isAxiosError(err)) {
+      console.error(
+        "[getEventVouchersApi] error",
+        err.response?.status,
+        err.response?.data,
+      );
+    } else {
+      console.error("[getEventVouchersApi] unknown error", err);
+    }
     throw err;
   }
 }
