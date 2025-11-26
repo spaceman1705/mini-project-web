@@ -54,8 +54,8 @@ export default function EventListSection({
               type="button"
               onClick={() => onTimeFilterChange(item.value)}
               className={`rounded-full px-3 py-1 text-xs ${timeFilter === item.value
-                  ? "bg-black text-white"
-                  : "border-lines bg-tertiary text-muted border"
+                ? "bg-black text-white"
+                : "border-lines bg-tertiary text-muted border"
                 }`}
             >
               {item.label}
@@ -117,58 +117,57 @@ export default function EventListSection({
                 <span>{event.location}</span>
               </p>
 
-                <div className="flex flex-1 flex-col gap-3 p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <h4 className="line-clamp-2 text-base leading-snug font-semibold">
-                      <Link
-                        href={`/events/${event.slug}`}
-                        className="hover:underline"
-                      >
-                        {event.title}
-                      </Link>
-                    </h4>
-
-                    <span
-                      className={
-                        "shrink-0 rounded-full px-2 py-0.5 text-xs " +
-                        (event.price === null || event.price === 0
-                          ? "bg-emerald-100 text-emerald-700"
-                          : "bg-amber-100 text-amber-700")
-                      }
+              <div className="flex flex-1 flex-col gap-3 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <h4 className="line-clamp-2 text-base leading-snug font-semibold">
+                    <Link
+                      href={`/events/${event.slug}`}
+                      className="hover:underline"
                     >
-                      {event.price === null || event.price === 0
-                        ? "Free"
-                        : `IDR ${event.price.toLocaleString("id-ID")}`}
-                    </span>
-                  </div>
+                      {event.title}
+                    </Link>
+                  </h4>
 
-                  <div className="text-muted flex items-center gap-2 text-sm">
-                    <PiMapPin className="shrink-0" />
-                    <span className="line-clamp-1">
-                      {event.location || "Location TBA"}
-                    </span>
-                  </div>
-
-                  <div className="text-muted flex items-center gap-2 text-sm">
-                    <PiClock className="shrink-0" />
-                    <span>{formatDateTime(event.date)}</span>
-                  </div>
-
-                  {event.tags && event.tags.length > 0 && (
-                    <div className="mt-1 flex flex-wrap gap-2">
-                      {event.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="border-lines bg-tertiary text-muted rounded-full border px-2 py-0.5 text-xs"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                  <span
+                    className={
+                      "shrink-0 rounded-full px-2 py-0.5 text-xs " +
+                      (event.price === null || event.price === 0
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-amber-100 text-amber-700")
+                    }
+                  >
+                    {event.price === null || event.price === 0
+                      ? "Free"
+                      : `IDR ${event.price.toLocaleString("id-ID")}`}
+                  </span>
                 </div>
-              </article>
-            </li>
+
+                <div className="text-muted flex items-center gap-2 text-sm">
+                  <PiMapPin className="shrink-0" />
+                  <span className="line-clamp-1">
+                    {event.location || "Location TBA"}
+                  </span>
+                </div>
+
+                <div className="text-muted flex items-center gap-2 text-sm">
+                  <PiClock className="shrink-0" />
+                  <span>{formatDateTime(event.date)}</span>
+                </div>
+
+                {event.tags && event.tags.length > 0 && (
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {event.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="border-lines bg-tertiary text-muted rounded-full border px-2 py-0.5 text-xs"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </article>
           ))}
         </ul>
       )}
