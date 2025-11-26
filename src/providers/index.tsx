@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
 import { SessionProvider } from "next-auth/react";
 import { SnackbarProvider } from "notistack";
 import Navbar from "@/components/navbar";
@@ -18,7 +18,9 @@ export default function Providers({ children }: ProvidersProps) {
                 anchorOrigin={{ vertical: "top", horizontal: "right" }}
             >
                 <>
-                    <Navbar />
+                    <Suspense fallback={null}>
+                        <Navbar />
+                    </Suspense>
                     <main>{children}</main>
                 </>
             </SnackbarProvider>
