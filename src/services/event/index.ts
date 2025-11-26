@@ -57,7 +57,15 @@ export async function getMyEvents(
 
     return data;
   } catch (err) {
-    console.error("getMyEvents error:", err);
+    if (axios.isAxiosError(err)) {
+      console.error(
+        "[getMyEvents] error",
+        err.response?.status,
+        err.response?.data,
+      );
+    } else {
+      console.error("[getMyEvents] unknown error", err);
+    }
     throw err;
   }
 }
@@ -176,6 +184,55 @@ export async function addTicketTypesApi(
     return data;
   } catch (err) {
     console.error("addTicketTypesApi error:", err);
+    throw err;
+  }
+}
+
+type UpdateTicketTypePayload = {
+  name?: string;
+  description?: string;
+  price?: number;
+  quota?: number;
+};
+
+export async function updateTicketTypeApi(
+  token: string,
+  eventId: string,
+  ticketId: string,
+  payload: UpdateTicketTypePayload,
+) {
+  try {
+    const { data } = await axios.patch<ApiResponse>(
+      `${baseUrl}/events/${eventId}/tickets/${ticketId}`,
+      payload,
+      {
+        headers: getAuthHeader(token),
+      },
+    );
+
+    return data;
+  } catch (err) {
+    console.error("updateTicketTypeApi error:", err);
+    throw err;
+  }
+}
+
+export async function deleteTicketTypeApi(
+  token: string,
+  eventId: string,
+  ticketId: string,
+) {
+  try {
+    const { data } = await axios.delete<ApiResponse>(
+      `${baseUrl}/events/${eventId}/tickets/${ticketId}`,
+      {
+        headers: getAuthHeader(token),
+      },
+    );
+
+    return data;
+  } catch (err) {
+    console.error("deleteTicketTypeApi error:", err);
     throw err;
   }
 }

@@ -16,7 +16,7 @@ type OrgNavItem = {
   description?: string;
 };
 
-const ORG_NAV_ITEMS: OrgNavItem[] = [
+const orgNavItems: OrgNavItem[] = [
   {
     href: "/org/dashboard",
     label: "Overview",
@@ -66,7 +66,7 @@ export default function OrgLayout({ children }: OrgLayoutProps) {
         </div>
 
         <nav className="space-y-1">
-          {ORG_NAV_ITEMS.map((item) => {
+          {orgNavItems.map((item) => {
             const active = isActive(item.href);
 
             return (
@@ -88,7 +88,7 @@ export default function OrgLayout({ children }: OrgLayoutProps) {
                 <div className="flex flex-col">
                   <span className="font-semibold">{item.label}</span>
                   {item.description && (
-                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                    <span className="text-muted-invert text-xs">
                       {item.description}
                     </span>
                   )}
@@ -107,7 +107,7 @@ export default function OrgLayout({ children }: OrgLayoutProps) {
           <span className="text-base font-semibold tracking-tight">Evora</span>
         </div>
         <nav className="bg-secondary flex items-center gap-1 rounded-full p-1 text-xs">
-          {ORG_NAV_ITEMS.map((item) => (
+          {orgNavItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
