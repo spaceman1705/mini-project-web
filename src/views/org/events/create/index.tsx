@@ -8,7 +8,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useSnackbar } from "notistack";
 
-import { createEventApi, getEventCategories } from "@/services/event";
+import { createEventApi } from "@/services/event";
 import type { CreateEventPayload } from "@/types/event";
 
 type CreateEventFormValues = {
@@ -54,10 +54,19 @@ function isAxiosError(
   return typeof error === "object" && error !== null && "response" in error;
 }
 
+const CATEGORIES = [
+  "Music",
+  "Nightlife",
+  "Art",
+  "Holiday",
+  "Dating",
+  "Hobby",
+  "Business",
+  "Food & Drink",
+];
+
 export default function OrganizerEventCreateViews() {
   const { data: session, status } = useSession();
-  const [categories, setCategories] = useState<string[]>([]);
-  const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const router = useRouter();
@@ -68,44 +77,6 @@ export default function OrganizerEventCreateViews() {
       router.push("/auth/login");
     }
   }, [status, router]);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setCategoriesLoading(true);
-        const res = await getEventCategories();
-        setCategories(res.data ?? []);
-      } catch (err) {
-        console.error("Failed to fetch categories:", err);
-        enqueueSnackbar("Failed to load categories, using default list.", {
-          variant: "warning",
-        });
-      } finally {
-        setCategoriesLoading(false);
-      }
-    };
-
-    fetchCategories();
-  }, [enqueueSnackbar]);
-
-  const defaultCategories: string[] = useMemo(
-    () => [
-      "Music",
-      "Nightlife",
-      "Art",
-      "Holiday",
-      "Dating",
-      "Hobby",
-      "Business",
-      "Food & Drink",
-    ],
-    [],
-  );
-
-  const categoryOptions = useMemo(() => {
-    if (categories.length === 0) return defaultCategories;
-    return categories;
-  }, [categories, defaultCategories]);
 
   const formik = useFormik<CreateEventFormValues>({
     initialValues: {
@@ -278,10 +249,8 @@ export default function OrganizerEventCreateViews() {
               onChange={handleChange}
               onBlur={handleBlur}
             >
-              <option value="">
-                {categoriesLoading ? "Loading..." : "Select category"}
-              </option>
-              {categoryOptions.map((cat) => (
+              <option value="">Select category</option>
+              {CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
                   {cat}
                 </option>
