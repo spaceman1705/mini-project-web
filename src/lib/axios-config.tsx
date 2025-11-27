@@ -12,17 +12,16 @@ export function AxiosInterceptor({ children }: AxiosInterceptorProps) {
   const { data: session } = useSession();
 
   useEffect(() => {
-    // Setup default baseURL
-    axios.defaults.baseURL = 'https://mini-project-api-one.vercel.app/api';
+    axios.defaults.baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://mini-project-api-one.vercel.app/api';
 
-    // Setup interceptor untuk semua axios request
     const requestInterceptor = axios.interceptors.request.use(
       (config) => {
-        // Debug log (hapus setelah jalan)
-        console.log('🔍 Session in interceptor:', session?.access_token ? 'Token exists' : 'No token');
-
+        // ✅ Hanya tambahkan token kalau ada session
         if (session?.access_token) {
           config.headers.Authorization = `Bearer ${session.access_token}`;
+          console.log('🔍 Token added to request');
+        } else {
+          console.log('🔍 No token (public request)');
         }
         return config;
       },
@@ -31,23 +30,28 @@ export function AxiosInterceptor({ children }: AxiosInterceptorProps) {
       }
     );
 
-    // Optional: Handle 401 response
     const responseInterceptor = axios.interceptors.response.use(
-      (response) => response,
+      (response) => {
+        console.log('✅ Response success:', response.status);
+        return response;
+      },
       (error) => {
-        if (error.response?.status === 401) {
-          console.error('❌ 401 Unauthorized - Please login again');
+        console.error('❌ Response error:', error.response?.status, error.message);
+
+        // Jangan reject kalau public route dan 401
+        if (error.response?.status === 401 && !session) {
+          console.log('ℹ️ 401 on public route - this is normal');
         }
+
         return Promise.reject(error);
       }
     );
 
-    // Cleanup interceptor saat component unmount
     return () => {
       axios.interceptors.request.eject(requestInterceptor);
       axios.interceptors.response.eject(responseInterceptor);
     };
   }, [session]);
 
-  return <>{children}</>;
+  return children;
 }

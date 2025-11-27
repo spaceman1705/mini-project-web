@@ -1,3 +1,5 @@
+"use client";
+
 import HomeViewClient from "./components";
 import type { HomeEvent, EventTag } from "@/types/event";
 import { getEvents } from "@/services/event";
