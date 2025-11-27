@@ -1,3 +1,5 @@
+// src/app/transactions/[id]/page.tsx (Komponen SERVER)
+
 import React from 'react';
 import TransactionActions from '@/components/TransactionActions';
 
