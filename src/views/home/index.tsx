@@ -21,7 +21,17 @@ async function fetchHomeData(): Promise<HomeInitialData> {
       sort: "newest",
     });
 
-    const items = eventsRes.data?.items ?? [];
+    console.log("📦 Full eventsRes:", eventsRes);
+    console.log("📦 eventsRes.data:", eventsRes.data);
+    console.log("📦 eventsRes.data?.items:", eventsRes.data?.items);
+
+    const items =
+      eventsRes.data?.items ?? // format: { data: { items: [] } }
+      eventsRes.data ?? // format: { data: [] }
+      eventsRes ?? // format langsung array []
+      [];
+
+    console.log("✅ Final items:", items);
 
     const mappedEvents: HomeEvent[] = items.map((event) => {
       const tags: EventTag[] = [];
