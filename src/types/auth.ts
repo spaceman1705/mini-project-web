@@ -1,11 +1,12 @@
 export interface DecodedToken {
+  id: string;
   email: string;
   firstname: string;
   lastname: string;
   role: string;
-  refferalCode?: string;
-  exp: number;
+  referralCode?: string; // ✅ Ganti dari refferalCode
   iat: number;
+  exp: number;
 }
 
 // Extend NextAuth types
@@ -17,7 +18,7 @@ declare module "next-auth" {
       firstname: string;
       lastname: string;
       role: string;
-      refferalCode?: string;
+      referralCode?: string;
     };
     access_token: string; // Ganti dari accessToken untuk hindari konflik
     error?: string;
@@ -29,7 +30,7 @@ declare module "next-auth" {
     firstname: string;
     lastname: string;
     role: string;
-    refferalCode?: string;
+    referralCode?: string; // ✅ Ganti dari refferalCode
     accessToken: string;
     refreshToken: string;
   }
@@ -41,7 +42,7 @@ declare module "next-auth/jwt" {
     firstname?: string;
     lastname?: string;
     role?: string;
-    refferalCode?: string;
+    referralCode?: string;
     accessToken?: string;
     refreshToken?: string;
     error?: string;

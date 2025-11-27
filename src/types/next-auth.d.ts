@@ -7,7 +7,7 @@ declare module "next-auth" {
     firstname: string;
     lastname: string;
     role: string;
-    refferalCode: string; // ✅ Tambahkan ini (typo di config: refferalCode)
+    referralCode?: string; // ✅ Tambahkan ini (typo di config: refferalCode)
     accessToken: string;
     refreshToken: string;
   }
@@ -19,7 +19,7 @@ declare module "next-auth" {
       firstname: string;
       lastname: string;
       role: string;
-      refferalCode: string; // ✅ Tambahkan ini
+      referralCode?: string; // ✅ Tambahkan ini
     };
     access_token: string; // ✅ Ganti dari accessToken ke access_token
     error?: string;
@@ -32,7 +32,7 @@ declare module "next-auth/jwt" {
     firstname?: string;
     lastname?: string;
     role?: string;
-    refferalCode?: string; // ✅ Tambahkan ini
+    referralCode?: string; // ✅ Tambahkan ini
     accessToken?: string;
     refreshToken?: string;
     error?: string;

@@ -1,3 +1,5 @@
+"use client";
+
 import EventsViewClient, { type EventsViewInitialData } from "./components";
 import type { EventListResponse } from "@/types/event";
 import { getEvents } from "@/services/event";
