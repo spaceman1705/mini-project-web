@@ -19,7 +19,7 @@ interface CustomSession extends DefaultSession {
     firstname: string;
     lastname: string;
     role: string;
-    refferalCode: string;
+    referralCode: string;
   };
   access_token: string; // Ganti dari accessToken
   error?: string;
@@ -45,7 +45,7 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
       firstname: decoded.firstname,
       lastname: decoded.lastname,
       role: decoded.role,
-      refferalCode: decoded.refferalCode || "",
+      referralCode: decoded.referralCode || "",
       accessToken,
       refreshToken,
       error: undefined,
@@ -104,7 +104,7 @@ const handler = NextAuth({
             firstname: decoded.firstname,
             lastname: decoded.lastname,
             role: decoded.role,
-            refferalCode: decoded.refferalCode || "",
+            referralCode: decoded.referralCode || "",
             accessToken,
             refreshToken,
           };
@@ -128,7 +128,7 @@ const handler = NextAuth({
           firstname: user.firstname,
           lastname: user.lastname,
           role: user.role,
-          refferalCode: user.refferalCode || "",
+          referralCode: user.referralCode || "",
           accessToken: user.accessToken,
           refreshToken: user.refreshToken,
           error: undefined,
@@ -162,7 +162,7 @@ const handler = NextAuth({
             firstname: "",
             lastname: "",
             role: "",
-            refferalCode: "",
+            referralCode: "",
           },
           access_token: "", // Ganti dari accessToken access_token
           error: token.error,
@@ -177,7 +177,7 @@ const handler = NextAuth({
           firstname: token.firstname ?? "",
           lastname: token.lastname ?? "",
           role: token.role ?? "",
-          refferalCode: token.refferalCode ?? "",
+          referralCode: token.referralCode ?? "",
         },
         access_token: token.accessToken ?? "", // Ganti dari accessToken
         error: token.error ?? undefined,

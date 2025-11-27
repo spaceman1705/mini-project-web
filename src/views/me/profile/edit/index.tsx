@@ -9,8 +9,8 @@ export default function EditProfilePage() {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (session?.accessToken) {
-            apiFetch("/profile", session.accessToken).then((data) =>
+        if (session?.access_token) {
+            apiFetch("/profile", session.access_token).then((data) =>
                 setForm({ firstname: data.firstname, lastname: data.lastname })
             );
         }

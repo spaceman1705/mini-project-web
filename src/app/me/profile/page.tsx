@@ -119,7 +119,7 @@ export default function CustomerProfilePage() {
                   Refferal Code
                 </label>
                 <p className="text-lg text-clear bg-secondary px-4 py-3 rounded-lg">
-                  {session.user.refferalCode}
+                  {session.user.referralCode}
                 </p>
               </div>
 
