@@ -27,6 +27,7 @@ import {
   deleteOrganizerEvent
 } from "@/services/dashboard";
 
+
 interface Stats {
   activeEvents: number;
   totalAttendees: number;
