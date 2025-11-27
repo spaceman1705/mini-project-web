@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { PiClock, PiMapPin } from "react-icons/pi";
 
 import type { HomeEvent } from "@/types/event";
@@ -54,8 +53,8 @@ export default function EventListSection({
               type="button"
               onClick={() => onTimeFilterChange(item.value)}
               className={`rounded-full px-3 py-1 text-xs ${timeFilter === item.value
-                ? "bg-black text-white"
-                : "border-lines bg-tertiary text-muted border"
+                  ? "bg-black text-white"
+                  : "border-lines bg-tertiary text-muted border"
                 }`}
             >
               {item.label}
@@ -74,100 +73,78 @@ export default function EventListSection({
       ) : (
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {events.map((event) => (
-            <article
-              key={event.id}
-              className="bg-secondary border-lines flex h-full flex-col rounded-2xl border p-4 shadow-lg"
-            >
-              {/* Thumbnail placeholder */}
-              <Link href={`/events/${event.slug}`} className="mb-3">
-                <div
-                  className={`h-32 w-full rounded-xl bg-cover bg-center ${event.bannerImg ? "" : "bg-tertiary"
-                    }`}
-                  style={
-                    event.bannerImg
-                      ? { backgroundImage: `url(${event.bannerImg})` }
-                      : {}
-                  }
-                >
-                </div>
-              </Link>
-
-              <div className="text-muted mb-2 flex items-center justify-between text-xs">
-                <span>
-                  {new Date(event.date).toLocaleDateString("id-ID", {
-                    weekday: "short",
-                    day: "2-digit",
-                    month: "short",
-                  })}
-                </span>
-                <span>
-                  {new Date(event.date).toLocaleTimeString("id-ID", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
-              </div>
-
-              <h4 className="line-clamp-2 text-sm font-semibold">
-                {event.title}
-              </h4>
-
-              <p className="text-muted mt-1 flex items-center gap-1 text-xs">
-                <PiMapPin className="inline-block" />
-                <span>{event.location}</span>
-              </p>
-
-              <div className="flex flex-1 flex-col gap-3 p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <h4 className="line-clamp-2 text-base leading-snug font-semibold">
-                    <Link
-                      href={`/events/${event.slug}`}
-                      className="hover:underline"
-                    >
-                      {event.title}
-                    </Link>
-                  </h4>
-
-                  <span
-                    className={
-                      "shrink-0 rounded-full px-2 py-0.5 text-xs " +
-                      (event.price === null || event.price === 0
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-amber-100 text-amber-700")
+            <li key={event.id}>
+              <article className="bg-secondary border-lines flex h-full flex-col rounded-2xl border p-4 shadow-lg">
+                {/* Banner Image */}
+                <Link href={`/events/${event.slug}`} className="mb-3">
+                  <div
+                    className={`h-40 w-full rounded-xl bg-cover bg-center ${event.bannerImg ? "" : "bg-tertiary"
+                      }`}
+                    style={
+                      event.bannerImg
+                        ? { backgroundImage: `url(${event.bannerImg})` }
+                        : {}
                     }
-                  >
-                    {event.price === null || event.price === 0
-                      ? "Free"
-                      : `IDR ${event.price.toLocaleString("id-ID")}`}
-                  </span>
-                </div>
+                  />
+                </Link>
 
-                <div className="text-muted flex items-center gap-2 text-sm">
-                  <PiMapPin className="shrink-0" />
-                  <span className="line-clamp-1">
-                    {event.location || "Location TBA"}
-                  </span>
-                </div>
-
-                <div className="text-muted flex items-center gap-2 text-sm">
-                  <PiClock className="shrink-0" />
-                  <span>{formatDateTime(event.date)}</span>
-                </div>
-
-                {event.tags && event.tags.length > 0 && (
-                  <div className="mt-1 flex flex-wrap gap-2">
-                    {event.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="border-lines bg-tertiary text-muted rounded-full border px-2 py-0.5 text-xs"
+                {/* Content */}
+                <div className="flex flex-1 flex-col gap-3">
+                  {/* Title & Price */}
+                  <div className="flex items-start justify-between gap-3">
+                    <h4 className="line-clamp-2 flex-1 text-base font-semibold leading-snug">
+                      <Link
+                        href={`/events/${event.slug}`}
+                        className="hover:underline"
                       >
-                        {tag}
-                      </span>
-                    ))}
+                        {event.title}
+                      </Link>
+                    </h4>
+
+                    <span
+                      className={
+                        "shrink-0 rounded-full px-2 py-0.5 text-xs " +
+                        (event.price === null || event.price === 0
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "bg-amber-100 text-amber-700")
+                      }
+                    >
+                      {event.price === null || event.price === 0
+                        ? "Free"
+                        : `IDR ${event.price.toLocaleString("id-ID")}`}
+                    </span>
                   </div>
-                )}
-              </div>
-            </article>
+
+                  {/* Location */}
+                  <div className="text-muted flex items-center gap-2 text-sm">
+                    <PiMapPin className="shrink-0" />
+                    <span className="line-clamp-1">
+                      {event.location || "Location TBA"}
+                    </span>
+                  </div>
+
+                  {/* Date & Time */}
+                  <div className="text-muted flex items-center gap-2 text-sm">
+                    <PiClock className="shrink-0" />
+                    <span>{formatDateTime(event.date)}</span>
+                  </div>
+
+                  {/* Tags */}
+                  {event.tags && event.tags.length > 0 && (
+                    <div className="mt-1 flex flex-wrap gap-2">
+                      {event.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="border-lines bg-tertiary text-muted rounded-full border px-2 py-0.5 text-xs"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </article>
+            </li>
           ))}
         </ul>
       )}
