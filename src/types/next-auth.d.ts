@@ -7,31 +7,34 @@ declare module "next-auth" {
     firstname: string;
     lastname: string;
     role: string;
+    refferalCode: string; // ✅ Tambahkan ini (typo di config: refferalCode)
     accessToken: string;
     refreshToken: string;
   }
 
   interface Session extends DefaultSession {
     user: {
+      id: string; // ✅ Tambahkan id
       email: string;
       firstname: string;
       lastname: string;
       role: string;
-      accessToken: string;
+      refferalCode: string; // ✅ Tambahkan ini
     };
-    accessToken?: string | null;
-    error?: string | null;
+    access_token: string; // ✅ Ganti dari accessToken ke access_token
+    error?: string;
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
-    email?: string | null;
-    firstname?: string | null;
-    lastname?: string | null;
+    email?: string;
+    firstname?: string;
+    lastname?: string;
     role?: string;
-    accessToken?: string | null;
-    refreshToken?: string | null;
-    error?: string | null;
+    refferalCode?: string; // ✅ Tambahkan ini
+    accessToken?: string;
+    refreshToken?: string;
+    error?: string;
   }
 }
