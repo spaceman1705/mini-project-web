@@ -27,7 +27,7 @@ const statusStyles: Record<EventStatus, string> = {
     "bg-slate-50 text-slate-700 ring-1 ring-slate-200 dark:bg-slate-900/20 dark:text-slate-300 dark:ring-slate-700/50",
 };
 
-const EVENT_CATEGORIES: string[] = [
+const eventCategories: string[] = [
   "Music",
   "Nightlife",
   "Art",
@@ -275,12 +275,14 @@ const OrganizerEventsView = () => {
           </p>
         </div>
 
-        <Link
-          href="/org/events/create"
-          className="bg-primary-invert text-clear-invert hover:bg-tertiary-invert focus-visible:ring-primary-invert inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium shadow-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-        >
-          + Create Event
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/org/events/create"
+            className="bg-primary-invert text-clear-invert hover:bg-tertiary-invert focus-visible:ring-primary-invert inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium shadow-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+          >
+            + Create Event
+          </Link>
+        </div>
       </header>
 
       {/* Filters */}
@@ -349,7 +351,7 @@ const OrganizerEventsView = () => {
               onChange={(e) => setCategory(e.target.value)}
             >
               <option value="ALL">All categories</option>
-              {EVENT_CATEGORIES.map((cat) => (
+              {eventCategories.map((cat) => (
                 <option key={cat} value={cat}>
                   {cat}
                 </option>
@@ -597,6 +599,13 @@ const OrganizerEventCard = ({ event }: OrganizerEventCardProps) => {
             className="bg-primary-invert text-clear-invert hover:bg-tertiary-invert inline-flex flex-1 items-center justify-center rounded-full px-3 py-1.5 text-xs font-medium shadow-sm"
           >
             Edit
+          </Link>
+
+          <Link
+            href={`/org/events/${event.id}/vouchers`}
+            className="border-lines text-accent1-primary hover:bg-accent1-primary inline-flex items-center justify-center rounded-full px-3 py-1.5 text-xs font-medium transition hover:text-white"
+          >
+            Manage vouchers
           </Link>
         </div>
       </div>

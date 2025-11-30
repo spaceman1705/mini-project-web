@@ -96,6 +96,17 @@ export type MyEventListItem = {
   createdAt: string;
 };
 
+export type EventVoucher = {
+  id: string;
+  code: string;
+  discountAmount: number;
+  expiredAt: string;
+  maxUsage: number | null;
+  usedCount: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type EventDetail = {
   id: string;
   title: string;
@@ -166,6 +177,8 @@ export type MyEventsResponse = ApiResponse<MyEventsListData>;
 export type EventDetailResponse = ApiResponse<EventDetail>;
 
 export type EventCategoriesResponse = ApiResponse<string[]>;
+
+export type EventVoucherListResponse = ApiResponse<EventVoucher[]>;
 
 export type GetEventsParams = {
   page?: number;
